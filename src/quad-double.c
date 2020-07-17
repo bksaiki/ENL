@@ -88,6 +88,29 @@ struct qd_t add_qd_d(struct qd_t* a, double b)
     return renormalize_qd(m[0], m[1], m[2], m[3], m[4]);
 }
 
+struct qd_t sub_qd_d(struct qd_t* a, double b)
+{
+    return add_qd_d(a, -b);
+}
+
+struct qd_t mul_qd_d(struct qd_t* a, double b)
+{
+    double a0b, a1b, a2b;
+    double m[5];
+
+    prod_f64(a->data[0], b, &m[0], &a0b);
+    prod_f64(a->data[1], b, &m[1], &a1b);
+    prod_f64(a->data[2], b, &m[2], &a2b);
+    m[3] = a->data[3] * b;
+
+    sum_f64(m[1], a0b, &m[1], &a0b);
+    sum3_f64_2(m[2], a1b, a0b, &m[2], &a1b, &a0b);
+    sum3_f64(m[3], a2b, a1b, &m[3], &a2b);
+    m[4] = a0b + a2b;
+    
+    return renormalize_qd(m[0], m[1], m[2], m[3], m[4]);
+}
+
 struct qd_t add_qd2(struct qd_t* a, struct qd_t* b)
 {
     double x[8] = { a->data[0], a->data[1], a->data[2], a->data[3],
@@ -112,11 +135,6 @@ struct qd_t add_qd2(struct qd_t* a, struct qd_t* b)
     if (k < 2) q.data[k + 1] = v;
     if (k < 3) q.data[k] = u;
     return q;
-}
-
-struct qd_t sub_qd_d(struct qd_t* a, double b)
-{
-    return add_qd_d(a, -b);
 }
 
 struct qd_t sub_qd2(struct qd_t* a, struct qd_t* b)

@@ -22,11 +22,17 @@ struct qd_t neg_qd(struct qd_t* x);
 
 struct qd_t add_qd_d(struct qd_t* a, double b);
 
-struct qd_t add_qd2(struct qd_t* a, struct qd_t* b);
-
 struct qd_t sub_qd_d(struct qd_t* a, double b);
 
+struct qd_t mul_qd_d(struct qd_t* a, double b);
+
+struct qd_t add_qd2(struct qd_t* a, struct qd_t* b);
+
 struct qd_t sub_qd2(struct qd_t* a, struct qd_t* b);
+
+
+
+
 
 // **** Miscellaneous **** //
 

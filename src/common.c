@@ -26,7 +26,7 @@ void sum_f64(double x, double y, double* s, double* e)
 
 void prod_f64(double x, double y, double* p, double* e)
 {
-#if defined(__FMA__) || defined(__AVX2__)
+#if !defined(__FMA__) && defined(__AVX2__)
     *p = x * y;
     *e = fma(x, y, -(*p));
 #else
@@ -35,7 +35,7 @@ void prod_f64(double x, double y, double* p, double* e)
     split_f64(x, &xh, &xl);
     split_f64(y, &yh, &yl);
     *p = x * y;
-    *e = ((xh * yl - *p) + xh * yl + xl * yh) + xl * yh;
+    *e = ((xh * yh - *p) + xh * yl + xl * yh) + xl * yl;
 #endif
 }
 
@@ -56,6 +56,24 @@ void accum3_f64(double x, double y, double z, double* s, double* e1, double* e2)
         *e1 = *s;
         *s = 0.0;
     }
+}
+
+void sum3_f64_2(double x, double y, double z, double* s, double* e1, double* e2)
+{
+    double u, v, w;
+
+    sum_f64(x, y, &u, &v);
+    sum_f64(u, z, s, &w);
+    sum_f64(v, w, e1, e2);
+}
+
+void sum3_f64(double x, double y, double z, double* s, double* e)
+{
+    double u, v, w;
+
+    sum_f64(x, y, &u, &v);
+    sum_f64(u, z, s, &w);
+    *e = v + w;
 }
 
 int cmp_f64(const void* x, const void* y)

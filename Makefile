@@ -9,8 +9,11 @@ SRCS 		:= $(shell find $(SRC_DIR)/*.c)
 OBJS 		:= $(SRCS:%.c=$(BUILD_DIR)/%.o)
 DEPS 		:= $(OBJS:.o=.d)
 
+TESTS 		:= $(shell find $(TEST_DIR)/*.c)
+TEST_EXES 	:= $(TESTS:$(TEST_DIR)/%.c=$(BUILD_DIR)/%)
+
 DEPFLAGS 	:= -MMD -MP
-CXXFLAGS	:= -g -O3 -Wall -std=c11 -march=native
+CFLAGS		:= -g -O3 -Wall -std=c11 -D_XOPEN_SOURCE -march=native
 LDFLAGS		:= -lm
 
 .PRECIOUS: $(BUILD_DIR)/. $(BUILD_DIR)%/.
@@ -21,9 +24,14 @@ LDFLAGS		:= -lm
 all: build-tests main;
 
 main: $(OBJS)
-	$(CC) $(CXXFLAGS) $(OBJS) $(ENTRY) $(LDFLAGS) -o $(EXE)
+	$(CC) $(CFLAGS) $(OBJS) $(ENTRY) $(LDFLAGS) -o $(EXE)
+
+tests: $(OBJS) $(TEST_EXES)
+	$(TEST_DIR)/test.sh $(TEST_EXES)
 
 build: $(OBJS);
+
+build-tests: $(TEST_EXES);
 
 clean:
 	$(RM) $(OBJS) $(EXE)
@@ -45,7 +53,10 @@ $(BUILD_DIR)%/.:
 	mkdir -p $@
 
 $(BUILD_DIR)/$(SRC_DIR)/%.o: $(SRC_DIR)/%.c | $$(@D)/.
-	$(CC) $(CXXFLAGS) $(DEPFLAGS) -c -o $@ $< $(LDFLAGS)
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c -o $@ $< $(LDFLAGS)
+
+$(BUILD_DIR)/%: $(TEST_DIR)/%.c $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $< $(LDFLAGS)
 
 -include $(DEPS)
-.PHONY: all main tests memcheck build-tests build clean clean-deps clean-all
+.PHONY: all main tests build-tests build clean clean-deps clean-all

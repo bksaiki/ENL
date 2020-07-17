@@ -24,6 +24,14 @@ void prod_f64(double x, double y, double* p, double* e);
 // components at e1 and e2.
 void accum3_f64(double x, double y, double z, double* s, double* e1, double* e2);
 
+// Computes the sum of x + y + z. The significand is stored at s while the two error
+// components are stored at e1 and e2.
+void sum3_f64_2(double x, double y, double z, double* s, double* e1, double* e2);
+
+// Computes the sum of x + y + z. Like 'sum_f64', the significand is stored at s while
+// the approximated error is stored at e.
+void sum3_f64(double x, double y, double z, double* s, double* e);
+
 // Compares two doubles and returns positive if x > y, negative if x < y,
 // or 0 if x == y.
 int cmp_f64(const void* x, const void* y);
