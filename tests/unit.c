@@ -28,6 +28,6 @@ int main()
 
     double a, b;
     split_f64(3.0, &a, &b);
-
+    
     return (int)(!status);
 }

@@ -11,27 +11,22 @@ struct qd_t
 // **** Initialization functions **** //
 
 struct qd_t to_qd(double x);
-
 struct qd_t to_qd4(double a0, double a1, double a2, double a3);
 
-void zero_qd(struct qd_t* x);
+void zero_qd(struct qd_t *x);
 
 // **** Arithmetic operators **** //
 
-struct qd_t neg_qd(struct qd_t* x);
+struct qd_t neg_qd(struct qd_t *x);
 
-struct qd_t add_qd_d(struct qd_t* a, double b);
+struct qd_t add_qd_d(struct qd_t *a, double b);
+struct qd_t sub_qd_d(struct qd_t *a, double b);
+struct qd_t mul_qd_d(struct qd_t *a, double b);
 
-struct qd_t sub_qd_d(struct qd_t* a, double b);
-
-struct qd_t mul_qd_d(struct qd_t* a, double b);
-
-struct qd_t add_qd2(struct qd_t* a, struct qd_t* b);
-
-struct qd_t sub_qd2(struct qd_t* a, struct qd_t* b);
-
-
-
+struct qd_t add_qd2(struct qd_t *a, struct qd_t *b);
+struct qd_t sub_qd2(struct qd_t *a, struct qd_t *b);
+struct qd_t mul_qd2(struct qd_t *a, struct qd_t *b);
+struct qd_t div_qd2(struct qd_t *a, struct qd_t *b);
 
 
 // **** Miscellaneous **** //
