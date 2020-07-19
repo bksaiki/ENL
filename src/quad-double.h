@@ -3,34 +3,37 @@
 
 #include "common.h"
 
-struct qd_t
+struct qd_struct_t
 {
     double data[4];
 };
 
+typedef struct qd_struct_t qd_t[1];
+
 // **** Initialization functions **** //
 
-struct qd_t to_qd(double x);
-struct qd_t to_qd4(double a0, double a1, double a2, double a3);
+void qd_init(qd_t qd);
 
-void zero_qd(struct qd_t *x);
+void qd_set_d(qd_t qd, double x);
+void qd_set_4d(qd_t qd, double a0, double a1, double a2, double a3);
+
+void qd_set_zero(qd_t qd);
 
 // **** Arithmetic operators **** //
 
-struct qd_t neg_qd(struct qd_t *x);
+void qd_neg(qd_t r, qd_t x);
 
-struct qd_t add_qd_d(struct qd_t *a, double b);
-struct qd_t sub_qd_d(struct qd_t *a, double b);
-struct qd_t mul_qd_d(struct qd_t *a, double b);
+void qd_add_d(qd_t r, qd_t a, double b);
+void qd_sub_d(qd_t r, qd_t a, double b);
+void qd_mul_d(qd_t r, qd_t a, double b);
 
-struct qd_t add_qd2(struct qd_t *a, struct qd_t *b);
-struct qd_t sub_qd2(struct qd_t *a, struct qd_t *b);
-struct qd_t mul_qd2(struct qd_t *a, struct qd_t *b);
-struct qd_t div_qd2(struct qd_t *a, struct qd_t *b);
-
+void qd_add(qd_t r, qd_t a, qd_t b);
+void qd_sub(qd_t r, qd_t a, qd_t b);
+void qd_mul(qd_t r, qd_t a, qd_t b);
+void qd_div(qd_t r, qd_t a, qd_t b);
 
 // **** Miscellaneous **** //
 
-struct qd_t renormalize_qd(double a0, double a1, double a2, double a3, double a4);
+void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double a4);
 
 #endif
