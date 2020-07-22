@@ -117,3 +117,12 @@ int cmp_abs_f64_rev(const void *x, const void *y)
 
     return (fabs(*dx) < fabs(*dy)) - (fabs(*dx) > fabs(*dy));
 }
+
+int powi(int b, int e)
+{
+    if (e < 0)      return -1;
+    if (e == 0)     return 1;
+    if (e == 1)     return b;
+    if (e % 2)      return powi(b, e - 1) * b;
+    else            return powi(b, e / 2) * powi(b, e / 2);
+}

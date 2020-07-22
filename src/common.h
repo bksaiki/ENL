@@ -46,4 +46,7 @@ void sum9by2_f64(double a0, double a1, double b0, double b1, double c0, double c
 // or 0 if |x| == |y|.
 int cmp_abs_f64_rev(const void *x, const void *y);
 
+// Returns the power of b raised to the e.
+int powi(int b, int e);
+
 #endif

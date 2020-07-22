@@ -21,11 +21,6 @@ LDFLAGS		:= -lm
 
 # Specific rules
 
-all: build-tests main;
-
-main: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(ENTRY) $(LDFLAGS) -o $(EXE)
-
 tests: $(OBJS) $(TEST_EXES)
 	$(TEST_DIR)/test.sh $(TEST_EXES)
 
@@ -44,6 +39,9 @@ clean-all:
 
 ### Specific tests
 
+test-sandbox: build/sandbox
+	$(TEST_DIR)/test.sh build/sandbox
+
 ### General rules
 
 $(BUILD_DIR)/.:
@@ -59,4 +57,4 @@ $(BUILD_DIR)/%: $(TEST_DIR)/%.c $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $< $(LDFLAGS)
 
 -include $(DEPS)
-.PHONY: all main tests build-tests build clean clean-deps clean-all
+.PHONY: all main tests build-tests build clean clean-deps clean-all test-sandbox
