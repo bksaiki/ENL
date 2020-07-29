@@ -15,6 +15,7 @@ typedef struct qd_struct_t qd_t[1];
 void qd_set(qd_t qd, qd_t x);
 void qd_set_d(qd_t qd, double x);
 void qd_set_zero(qd_t qd);
+void qd_set_str(qd_t qd, char* str);
 
 // **** Arithmetic operators **** //
 
@@ -34,7 +35,6 @@ void qd_div(qd_t r, qd_t a, qd_t b);
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b);
-
 int qd_sgn(qd_t x);
 
 int qd_is_zero(qd_t x);

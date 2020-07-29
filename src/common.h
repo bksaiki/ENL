@@ -39,8 +39,8 @@ void sum6by3_f64(double x0, double x1, double x2, double y0, double y1, double y
 
 // Computes the sum of 9 doubles, grouping them into pairs, with 'f' being the lone double.
 // Like 'sum2_f64', the significand is stored at s while the approximated error is stored at e.
-void sum9by2_f64(double a0, double a1, double b0, double b1, double c0, double c1, 
-                 double d0, double d1, double f, double* s, double* e);
+void sum9by2_f64(double a0, double a1, double a2, double a3, double b0, double b1, 
+                 double b2, double b3, double c, double* s, double* e);
 
 // Compares two doubles and returns positive if |x| < |y|, negative if |x| > |y|,
 // or 0 if |x| == |y|.
