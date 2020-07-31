@@ -74,6 +74,7 @@ void qd_set_str(qd_t qd, char* str)
 
     pdot = pbeg;
     pexp = pbeg;
+    qd_set_zero(qd);
     for (; *idx != '\0'; ++idx)
     {
         if (*idx == '.')
@@ -103,7 +104,7 @@ void qd_set_str(qd_t qd, char* str)
                 ++idx;
                 exp_sign = true;
             }
-            else if (*(idx + 1) <= '0' || *(idx + 1) >= '9')
+            else if (*(idx + 1) < '0' || *(idx + 1) > '9')
             {
                 return;     // ill-formed
             }    
@@ -127,15 +128,16 @@ void qd_set_str(qd_t qd, char* str)
             pow10 += (int)(*it - '0');
         }
 
-        if (exp_sign) pow10 *= -1; // negate pow10 if exp sign negative
+        if (exp_sign) pow10 *= -1;      // negate pow10 if exp sign negative
+        
         pow10 += (int)(pdot - pexp + 1);
+        if (pdot == pbeg)   ++pow10;    // no decimal point
     }
     else
     {
         pow10 += (int)(pdot - pend + 1);
+        if (pdot == pbeg)   ++pow10;    // no decimal point
     }
-
-    printf("%.20g + %.20g + %.20g + %.20g\n", qd->data[0], qd->data[1], qd->data[2], qd->data[3]);
 
     abspow10 = abs(pow10);
     if (abspow10 != 0)
@@ -145,12 +147,10 @@ void qd_set_str(qd_t qd, char* str)
         {
             if (abspow10 >= pow2)
             {
-                qd_mul(qd10, qd10, &qd_powers_10[i]);
+                qd_mul(qd10, &qd_powers_10[i], qd10);
                 abspow10 -= pow2;
             }
         }
-
-        printf("10^|%i| = %.20g + %.20g + %.20g + %.20g\n", pow10, qd10->data[0], qd10->data[1], qd10->data[2], qd10->data[3]);
 
         if (pow10 > 0)      qd_mul(qd, qd, qd10);
         else                qd_div(qd, qd, qd10);
@@ -195,19 +195,9 @@ void qd_sub_d(qd_t r, qd_t a, double b)
 
 void qd_mul_d(qd_t r, qd_t a, double b)
 {
-    double e0, e1, e2;
-
-    prod_f64(a->data[0], b, &r->data[0], &e0);
-    prod_f64(a->data[1], b, &r->data[1], &e1);
-    prod_f64(a->data[2], b, &r->data[2], &e2);
-    a->data[3] *= b;
-
-    sum2_f64(r->data[1], e0, &r->data[1], &e0);
-    sum3_f64_2(r->data[2], e1, e0, &r->data[2], &e1, &e0);
-    sum3_f64(a->data[3], e2, e1, &r->data[3], &e1);
-    e0 += e1;
-
-    qd_renormalize(r, r->data[0], r->data[1], r->data[2], r->data[3], e0);
+    qd_t qb;
+    qd_set_d(qb, b);
+    qd_mul(r, a, qb);
 }
 
 void qd_div_d(qd_t r, qd_t a, double b)
@@ -260,7 +250,7 @@ void qd_mul(qd_t r, qd_t a, qd_t b)
     prod_f64(a->data[0], b->data[1], &p01, &q01); // a0b1
     prod_f64(a->data[2], b->data[0], &p20, &q20); // a2b0
     prod_f64(a->data[1], b->data[1], &p11, &q11); // a1b1
-    prod_f64(a->data[1], b->data[2], &p02, &q02); // a0b2
+    prod_f64(a->data[0], b->data[2], &p02, &q02); // a0b2
     prod_f64(a->data[3], b->data[0], &p30, &q30); // a3b0
     prod_f64(a->data[2], b->data[1], &p21, &q21); // a2b1
     prod_f64(a->data[1], b->data[2], &p12, &q12); // a1b2
@@ -343,11 +333,12 @@ int qd_is_number(qd_t x)
 
 char* qd_to_str(qd_t qd, int len)
 {
-    char *out, *pstr, *pend;
-    int exp = 0, exp_len = 0;
-    int digit;
     qd_t tmp;
+    char *out, *pstr, *pend;
+    int digit, abs_exp, exp_len;
+    int exp = 0;
 
+    // normalize qd => x * 10^n where 1 <= x < 10
     qd_abs(tmp, qd);  
     if (qd_cmp(tmp, &qd_powers_10[0]) >= 0) // qd >= 10
     {
@@ -361,7 +352,7 @@ char* qd_to_str(qd_t qd, int len)
         }
     }
 
-    if (qd_cmp(tmp, QD_ONE) < 0) // qd < 1
+    if (qd_cmp(tmp, QD_ONE) < 0)
     {
         for (int p10 = 8; p10 >= 0; --p10)
         {
@@ -371,23 +362,32 @@ char* qd_to_str(qd_t qd, int len)
                 qd_div(tmp, tmp, &qd_neg_powers_10[p10]);
             }
         }     
+
+        exp -= 1;
+        qd_mul_d(tmp, tmp, 10);
     }
 
-    if (len == 0)           len = 64;
+    if (len == 0)           len = 66; // default string length
     if (qd_sgn(tmp))        ++len;
-    ++len; // decimal point, TODO: non_scientific format
-    ++len; // exponent mark
 
-    if (exp >= 100)         exp_len = 3;
-    else if (exp >= 10)     exp_len = 2;
-    else                    exp_len = 1;
-    len += exp_len;
+    abs_exp = abs(exp);
+    if (abs_exp >= 100)         exp_len = 4; // exponent sign
+    else if (abs_exp >= 10)     exp_len = 3;
+    else if (abs_exp > 0)       exp_len = 3; // leading zero
+    else                        exp_len = 0;              
+
+    len += (exp_len + 2); // decimal point, exponent mark
 
     out = (char*)malloc(len);
     pstr = out;
-    pend = out + (len - 1);
+    pend = out + len - 1;
 
-    if (qd_sgn(qd)) out[pstr++ - out] = '-';
+    if (qd_sgn(qd))
+    {
+        *pstr = '-';
+        ++pstr;
+    }
+
     digit = (int)tmp->data[0];
     *pstr = (char)digit + '0';
     ++pstr;
@@ -406,22 +406,29 @@ char* qd_to_str(qd_t qd, int len)
         ++pstr;
     }
 
-    while ((pstr - out) < (len - exp_len - 2))
+    while ((pstr - out) < (len - exp_len - 2)) // trailing zeros
     {
         *pstr = '0';
         ++pstr;
     }
 
-    *pstr = 'e';
-    ++pstr;
-
-    pstr = pend - 1;
-    for (int i = 0; i < exp_len; ++i)
+    if (exp != 0)
     {
-        *pstr = ((char)(exp % 10) + '0');
-        exp /= 10;
-        --pstr;
-    } 
+        *pstr = 'e';
+        ++pstr;
+
+        if (exp < 0)  *pstr = '-';
+        else          *pstr = '+';
+        ++pstr;
+
+        pstr = pend - 1;
+        for (int i = 0; i < (exp_len - 1); ++i)
+        {
+            *pstr = ((char)(abs_exp % 10) + '0');
+            abs_exp /= 10;
+            --pstr;
+        } 
+    }
 
     *pend = '\0';
     return out;

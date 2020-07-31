@@ -1,4 +1,4 @@
 build
 *.o
 *.d
-test
+tests/sandbox.c

@@ -13,7 +13,7 @@ TESTS 		:= $(shell find $(TEST_DIR)/*.c)
 TEST_EXES 	:= $(TESTS:$(TEST_DIR)/%.c=$(BUILD_DIR)/%)
 
 DEPFLAGS 	:= -MMD -MP
-CFLAGS		:= -g -O3 -Wall -std=c11 -D_XOPEN_SOURCE -march=native
+CFLAGS		:= -g -Wall -std=c11 -D_XOPEN_SOURCE -march=native
 LDFLAGS		:= -lm
 
 .PRECIOUS: $(BUILD_DIR)/. $(BUILD_DIR)%/.
