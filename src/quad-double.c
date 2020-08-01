@@ -10,22 +10,22 @@ struct qd_struct_t qd_powers_10[9] = {
     { .data[0] = 1e+4, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // 10^4
     { .data[0] = 1e+8, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // ...
     { .data[0] = 1e+16, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                        
-    { .data[0] = 1.0000000000000000537e+32, .data[1] = -5366162204393472, .data[2] = 0.0, .data[3] = 0.0 },
-    { .data[0] = 1.0000000000000000213e+64, .data[1] = -2.1320419009454395642e+47, .data[2] = -1.2300353422800672893e+31, .data[3] = 0.0 },
-    { .data[0] = 1.0000000000000000752e+128, .data[1] = -7.5174486916518203623e+111, .data[2] = -3.7746004337872938512e+95, .data[3] = -2.7693106414954529128e+79 },
-    { .data[0] = 1.0000000000000000301e+256, .data[1] = -3.0127659900140537563e+239, .data[2] = 1.2945860821658988444e+223, .data[3] = 8.6460197918246650621e+206 }
+    { .data[0] = 1e+32, .data[1] = -5366162204393472.0, .data[2] = 0.0, .data[3] = 0.0 },
+    { .data[0] = 1e+64, .data[1] = -2.1320419009454396e+47, .data[2] = -1.2300353422800673e+31, .data[3] = 0.0 },
+    { .data[0] = 1e+128, .data[1] = -7.51744869165182e+111, .data[2] = -5.0046357760673614e+95, .data[3] = -2.2998043059195224e+78 },
+    { .data[0] = 1e+256, .data[1] = -3.012765990014054e+239, .data[2] = -3.132205662339866e+222, .data[3] = -8.48134226662446e+205 }
 };
 
 struct qd_struct_t qd_neg_powers_10[9] = {
-    { .data[0] = 0.10000000000000001, .data[1] = -5.551115123125783e-18, .data[2] = 3.0814879110195775e-34, .data[3] = -1.7105694144590053e-50 },      // 10^-1
-    { .data[0] = 0.01, .data[1] = -2.0816681711721689e-19, .data[2] = 9.6296497219361745e-36, .data[3] = -3.2073176521106395e-52 },                    // 10^-2
-    { .data[0] = 0.0001, .data[1] = -4.7921736023859299e-21, .data[2] = -3.6833410186405893e-37, .data[3] = 9.6887720740842028e-54 },                  // 10^-3
-    { .data[0] = 1e-08, .data[1] = -2.0922560830128485e-25, .data[2] = 1.62414527970063e-41, .data[3] = -1.2387181230735639e-57 },                     // 10^-4
-    { .data[0] = 9.9999999999999998e-17, .data[1] = 2.0902213275965374e-33, .data[2] = -1.682610136834013e-50, .data[3] = -7.8169998873804196e-67 },   // ...
-    { .data[0] = 1.0000000000000001e-32, .data[1] = -5.5967309976241948e-49, .data[2] = 5.3141961247582773e-66, .data[3] = -2.522370178408082e-82 },
-    { .data[0] = 9.9999999999999997e-65, .data[1] = 3.4694261166452981e-81, .data[2] = -1.2979639752263831e-97, .data[3] = 1.7678114322863393e-114 },
-    { .data[0] = 1.0000000000000001e-128, .data[1] = -5.4014088595681218e-145, .data[2] = 3.2759637959106361e-161, .data[3] = -2.3283480399724545e-179 },
-    { .data[0] = 9.9999999999999998e-257, .data[1] = 2.2671708827212071e-273, .data[2] = -1.5349345474920539e-289, .data[3] = -7.0490515193067622e-306 }
+    { .data[0] = 1e-1, .data[1] = -5.551115123125783e-18, .data[2] = 3.0814879110195775e-34, .data[3] = -1.7105694144590053e-50 },      // 10^-1
+    { .data[0] = 1e-2, .data[1] = -2.0816681711721684e-19, .data[2] = -7.703719777548944e-36, .data[3] = 1.6036588260553173e-52 },      // 10^-2
+    { .data[0] = 1e-4, .data[1] = -4.79217360238593e-21, .data[2] = 3.442599775592184e-37, .data[3] = -5.078252949175172e-54 },         // 10^-3
+    { .data[0] = 1e-8, .data[1] = -2.092256083012847e-25, .data[2] = -1.582638574173095e-41, .data[3] = 5.4982215447355565e-59 },       // 10^-4
+    { .data[0] = 1e-16, .data[1] = 2.0902213275965398e-33, .data[2] = -1.3550063967589306e-49, .data[3] = 8.651653255873321e-66 },      // ...
+    { .data[0] = 1e-32, .data[1] = 2-5.59673099762419e-49, .data[2] = 3.0688625784648003e-66, .data[3] = -2.3719300994621642e-82 },
+    { .data[0] = 1e-64, .data[1] = 23.469426116645307e-81, .data[2] = 9.899885481330491e-98, .data[3] = -2.825571992850639e-114 },
+    { .data[0] = 1e-128, .data[1] = 2-5.401408859568103e-145, .data[2] = -4.759216114517928e-162, .data[3] = -3.583550944062863e-178 },
+    { .data[0] = 1e-256, .data[1] = 2.2671708827212437e-273, .data[2] = -1.1994609675448683e-289, .data[3] = -3.060993260309854e-306 }
 };
 
 qd_t QD_ONE = { { .data[0] = 1.0, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 } };
@@ -69,8 +69,15 @@ void qd_set_str(qd_t qd, char* str)
     pbeg = idx;
     pend = idx;
     pexpn = idx;
-    if (*idx == '-')        sign = true;
-    else if (*idx != '+')   pbeg = idx - 1;
+    if (*idx == '-')
+    {
+        sign = true;
+        ++pbeg;
+    }
+    else if (*idx == '+')
+    {
+        ++pbeg;
+    }
 
     pdot = pbeg;
     pexp = pbeg;
@@ -80,7 +87,7 @@ void qd_set_str(qd_t qd, char* str)
         if (*idx == '.')
         {
             if (pdot != pbeg)    return;     // ill-formed
-            pdot = idx;
+            pdot = idx + 1;
         }
         else if (*idx >= '0' && *idx <= '9')
         {
@@ -128,15 +135,13 @@ void qd_set_str(qd_t qd, char* str)
             pow10 += (int)(*it - '0');
         }
 
-        if (exp_sign) pow10 *= -1;      // negate pow10 if exp sign negative
-        
-        pow10 += (int)(pdot - pexp + 1);
-        if (pdot == pbeg)   ++pow10;    // no decimal point
+        // negate pow10 if exp sign negative
+        if (exp_sign) pow10 *= -1;
+        if (pdot != pbeg)   pow10 -= (int)(pexp - pdot);
     }
     else
     {
-        pow10 += (int)(pdot - pend + 1);
-        if (pdot == pbeg)   ++pow10;    // no decimal point
+        if (pdot != pbeg)   pow10 -= (int)(pend - pdot);
     }
 
     abspow10 = abs(pow10);
@@ -195,15 +200,24 @@ void qd_sub_d(qd_t r, qd_t a, double b)
 
 void qd_mul_d(qd_t r, qd_t a, double b)
 {
-    qd_t qb;
-    qd_set_d(qb, b);
-    qd_mul(r, a, qb);
+    double m0, m1, m2, m3, e0, e1, e2;
+
+    prod_f64(a->data[0], b, &m0, &e0);
+    prod_f64(a->data[1], b, &m1, &e1);
+    prod_f64(a->data[2], b, &m2, &e2);
+    m3 = a->data[3] * b;
+
+    sum2_f64(m1, e0, &m1, &e0);
+    sum3_f64_2(m2, e1, e0, &m2, &e1, &e0);
+    sum3_f64(m3, e2, e1, &m3, &e1);
+    e0 += e1;
+
+    qd_renormalize(r, m0, m1, m2, m3, e0);
 }
 
 void qd_div_d(qd_t r, qd_t a, double b)
 {
     qd_t q;
-
     qd_set_d(q, b);
     qd_div(r, a, q);
 }
@@ -291,6 +305,97 @@ void qd_div(qd_t res, qd_t a, qd_t b)
     qd_renormalize(res, q[0], q[1], q[2], q[3], r->data[0] / b->data[0]);
 }
 
+void qd_powi(qd_t r, qd_t a, int b)
+{
+    qd_t p;
+
+    if (b < 0)
+    {
+        qd_powi(r, a, -b);
+        qd_div(r, QD_ONE, r);
+    }
+    else if (b == 0)     
+    {
+        qd_set(r, QD_ONE);
+    }
+    else if (b == 1)    
+    {
+        qd_set(r, a);
+    }
+    else if (b % 2)
+    {
+        qd_powi(p, a, b - 1);
+        qd_mul(r, p, a);
+    }
+    else
+    {
+        qd_powi(p, a, b / 2);
+        qd_mul(r, p, p);
+    }
+}
+
+void qd_sqrt(qd_t r, qd_t a)
+{
+    qd_t x0, t;
+
+    qd_set_d(x0, sqrt(a->data[0]));  // initial guess
+
+    // Newton's iteration: x(n+1) = x(n) + [a / x(n) -  x(n)] / 2
+    // quadratically convergent, around 2 iterations required
+    for (int i = 0; i < 3; ++i)
+    {
+        qd_div(t, a, x0);
+        qd_sub(t, t, x0);
+
+        t->data[0] /= 2.0;
+        t->data[1] /= 2.0;
+        t->data[2] /= 2.0;
+        t->data[3] /= 2.0;
+
+        qd_add(x0, t, x0);
+    }
+
+    qd_set(r, x0);
+}
+
+void qd_nroot(qd_t r, qd_t a, int n)
+{
+    qd_t x0, t, s;
+    char* str;
+
+    if (n < 0) // x^(1/(-n)) => 1 / x^(1/n)
+    {
+        qd_nroot(t, a, -n);
+        qd_div(r, QD_ONE, t);
+    }
+    else if (n == 0) // nan
+    {
+
+    }
+    else
+    {
+        // initial guess: nth root of a0
+        qd_set_d(x0, pow(a->data[0], (1.0 / ((double) n)))); 
+    
+        str = qd_to_str(x0, 0);
+	    printf("nroot init: %.17g -> %s\n", a->data[0], str);
+	    free(str);
+
+        // Newton's iteration: x(k+1) = (1/n)*[(n-1)*x(k) + a / x(k)^(n-1)]
+        // quadratically convergent, around 2 iterations required
+        for (int i = 0; i < 3; ++i)
+        {
+            qd_powi(t, x0, n - 1);
+            qd_div(t, a, t);
+            qd_mul_d(s, x0, (double)(n - 1));
+            qd_add(t, s, t);
+            qd_div_d(x0, t, (double) n);
+        }
+
+        qd_set(r, x0);
+    }
+}
+
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b)
@@ -306,7 +411,7 @@ int qd_cmp(qd_t a, qd_t b)
 
 int qd_sgn(qd_t x)
 {
-    return x->data[0] < 0.0;
+    return (x->data[0] < 0.0);
 }
 
 int qd_is_zero(qd_t x)
@@ -363,18 +468,19 @@ char* qd_to_str(qd_t qd, int len)
             }
         }     
 
-        exp -= 1;
-        qd_mul_d(tmp, tmp, 10);
+        if (qd_cmp(tmp, QD_ONE) < 0)
+        {
+            exp -= 1;
+            qd_mul_d(tmp, tmp, 10);
+        }
     }
 
     if (len == 0)           len = 66; // default string length
     if (qd_sgn(tmp))        ++len;
 
     abs_exp = abs(exp);
-    if (abs_exp >= 100)         exp_len = 4; // exponent sign
-    else if (abs_exp >= 10)     exp_len = 3;
-    else if (abs_exp > 0)       exp_len = 3; // leading zero
-    else                        exp_len = 0;              
+    if (abs_exp >= 100)     exp_len = 4; // exponent sign
+    else                    exp_len = 3; // leading zero if needed  
 
     len += (exp_len + 2); // decimal point, exponent mark
 
@@ -388,7 +494,9 @@ char* qd_to_str(qd_t qd, int len)
         ++pstr;
     }
 
+    // round down if next significand negative and current significand is exact integer
     digit = (int)tmp->data[0];
+    if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
     *pstr = (char)digit + '0';
     ++pstr;
 
@@ -400,6 +508,7 @@ char* qd_to_str(qd_t qd, int len)
     while (!qd_is_zero(tmp) && (pstr - out) < (len - exp_len - 2))
     {
         digit = (int)tmp->data[0];
+        if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
         *pstr = (char)digit + '0';
         qd_sub_d(tmp, tmp, (double)digit);
         qd_mul_d(tmp, tmp, 10.0);
@@ -412,23 +521,20 @@ char* qd_to_str(qd_t qd, int len)
         ++pstr;
     }
 
-    if (exp != 0)
+    *pstr = 'e';
+    ++pstr;
+
+    if (exp < 0)  *pstr = '-';
+    else          *pstr = '+';
+    ++pstr;
+
+    pstr = pend - 1;
+    for (int i = 0; i < (exp_len - 1); ++i)
     {
-        *pstr = 'e';
-        ++pstr;
-
-        if (exp < 0)  *pstr = '-';
-        else          *pstr = '+';
-        ++pstr;
-
-        pstr = pend - 1;
-        for (int i = 0; i < (exp_len - 1); ++i)
-        {
-            *pstr = ((char)(abs_exp % 10) + '0');
-            abs_exp /= 10;
-            --pstr;
-        } 
-    }
+        *pstr = ((char)(abs_exp % 10) + '0');
+        abs_exp /= 10;
+        --pstr;
+    } 
 
     *pend = '\0';
     return out;

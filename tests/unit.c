@@ -1,8 +1,10 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../src/common.h"
+#include "../src/quad-double.h"
 
 #define _GNU_SOURCE
 
@@ -14,10 +16,10 @@ void log_test(const char* str)
 int main()
 {
     bool status = true;
+    bool res;
 
     {
         double x, x0, x1;
-        bool res;
         
         x = M_PI;
         split_f64(x, &x0, &x1);
@@ -26,8 +28,17 @@ int main()
         status &= res;
     }
 
-    double a, b;
-    split_f64(3.0, &a, &b);
+    {
+        qd_t qd;
+        char *istr, *ostr;
+        
+        istr = "3.1415926535897932384626433832795028841971693993751058209749445923e+00";
+        qd_set_str(qd, istr);
+        ostr = qd_to_str(qd, 0);
+        res = (strcmp(istr, ostr) == 0);
+        if (!res) printf("FAILED \"qd I/O\": %s != %s\n", istr, ostr);
+        status &= res;
+    }
     
     return (int)(!status);
 }

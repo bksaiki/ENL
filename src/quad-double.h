@@ -32,6 +32,11 @@ void qd_sub(qd_t r, qd_t a, qd_t b);
 void qd_mul(qd_t r, qd_t a, qd_t b);
 void qd_div(qd_t r, qd_t a, qd_t b);
 
+void qd_powi(qd_t r, qd_t a, int b);
+
+void qd_sqrt(qd_t r, qd_t a);
+void qd_nroot(qd_t r, qd_t a, int n);
+
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b);
