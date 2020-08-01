@@ -110,6 +110,11 @@ int cmp_abs_f64_rev(const void *x, const void *y)
     return ((fabs(*dx) < fabs(*dy)) - (fabs(*dx) > fabs(*dy)));
 }
 
+int sgn(double val)
+{
+    return (0.0 < val) - (val < 0.0);
+}
+
 int powi(int b, int e)
 {
     if (e < 0)      return -1;

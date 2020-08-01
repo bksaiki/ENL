@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     qd_set_d(one, 1.0);
     qd_set_d(two, 2.0);
     qd_set_d(four, 4.0);
-    qd_set_zero(accum);
+    qd_set_zero(accum, 1);
 
     for (int i = 0; i < iter; ++i)
     {

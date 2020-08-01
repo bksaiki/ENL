@@ -1,7 +1,9 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "quad-double.h"
 
 struct qd_struct_t qd_powers_10[9] = {
@@ -48,14 +50,6 @@ void qd_set_d(qd_t qd, double x)
     qd->data[3] = 0.0;
 }
 
-void qd_set_zero(qd_t qd)
-{
-    qd->data[0] = 0.0;
-    qd->data[1] = 0.0;
-    qd->data[2] = 0.0;
-    qd->data[3] = 0.0;
-}
-
 void qd_set_str(qd_t qd, char* str)
 {
     char *idx, *pbeg, *pdot, *pexp, *pexpn, *pend;
@@ -73,15 +67,29 @@ void qd_set_str(qd_t qd, char* str)
     {
         sign = true;
         ++pbeg;
+        ++idx;
     }
     else if (*idx == '+')
     {
         ++pbeg;
+        ++idx;
+    }
+
+    if (strcmp(idx, "nan") == 0)
+    {
+        qd_set_nan(qd);
+        return;
+    }
+
+    if (strcmp(idx, "inf") == 0)
+    {
+        qd_set_inf(qd, (sign ? -1 : 1));
+        return;
     }
 
     pdot = pbeg;
     pexp = pbeg;
-    qd_set_zero(qd);
+    qd_set_zero(qd, 1);
     for (; *idx != '\0'; ++idx)
     {
         if (*idx == '.')
@@ -164,6 +172,32 @@ void qd_set_str(qd_t qd, char* str)
     if (sign)  qd_neg(qd, qd);
 }
 
+void qd_set_nan(qd_t qd)
+{
+    qd->data[0] = NAN;
+    qd->data[1] = NAN;
+    qd->data[2] = NAN;
+    qd->data[3] = NAN;
+}
+
+void qd_set_inf(qd_t qd, int sign)
+{
+    double v = (sign < 0) ? -INFINITY : INFINITY;
+    qd->data[0] = v;
+    qd->data[1] = v;
+    qd->data[2] = v;
+    qd->data[3] = v;
+}
+
+void qd_set_zero(qd_t qd, int sign)
+{
+    double v = (sign < 0) ? -0.0 : 0.0;
+    qd->data[0] = v;
+    qd->data[1] = v;
+    qd->data[2] = v;
+    qd->data[3] = v;
+}
+
 // **** Arithmetic operators **** //
 
 void qd_neg(qd_t r, qd_t x)
@@ -176,8 +210,8 @@ void qd_neg(qd_t r, qd_t x)
 
 void qd_abs(qd_t r, qd_t x)
 {
-    if (qd_sgn(x))  qd_neg(r, x);
-    else            qd_set(r, x);
+    if (qd_signbit(x))  qd_neg(r, x);
+    else                qd_set(r, x);
 }
 
 void qd_add_d(qd_t r, qd_t a, double b)
@@ -185,12 +219,34 @@ void qd_add_d(qd_t r, qd_t a, double b)
     double m[4];
     double t;
 
-    sum2_f64(a->data[0], b, &m[0], &t);
-    sum2_f64(a->data[1], t, &m[1], &t);
-    sum2_f64(a->data[2], t, &m[2], &t);
-    sum2_f64(a->data[3], t, &m[3], &t);
-
-    qd_renormalize(r, m[0], m[1], m[2], m[3], t);
+    if (qd_nan_p(a) || isnan(b) || (qd_inf_p(a) && isinf(b) && qd_sgn(a) != sgn(b)))
+    {
+        qd_set_nan(r);
+    }
+    else if (qd_inf_p(a))
+    {
+        qd_set(r, a);
+    }
+    else if (isinf(b))
+    {
+        qd_set_d(r, b);
+    }
+    else if (qd_zero_p(a))
+    {
+        qd_set_d(r, b);
+    }
+    else if (b == 0.0)
+    {
+        qd_set(r, a);
+    }
+    else
+    {
+        sum2_f64(a->data[0], b, &m[0], &t);
+        sum2_f64(a->data[1], t, &m[1], &t);
+        sum2_f64(a->data[2], t, &m[2], &t);
+        sum2_f64(a->data[3], t, &m[3], &t);
+        qd_renormalize(r, m[0], m[1], m[2], m[3], t);
+    }
 }
 
 void qd_sub_d(qd_t r, qd_t a, double b)
@@ -202,17 +258,36 @@ void qd_mul_d(qd_t r, qd_t a, double b)
 {
     double m0, m1, m2, m3, e0, e1, e2;
 
-    prod_f64(a->data[0], b, &m0, &e0);
-    prod_f64(a->data[1], b, &m1, &e1);
-    prod_f64(a->data[2], b, &m2, &e2);
-    m3 = a->data[3] * b;
+    if (qd_nan_p(a) || isnan(b) || (qd_inf_p(a) && b == 0.0) || (qd_zero_p(a) && isinf(b))) 
+    { 
+        qd_set_nan(r);
+    }
+    else if (qd_inf_p(a))
+    {
+        qd_set(r, a);
+    }
+    else if (isinf(b))
+    {
+        qd_set_inf(r, sgn(b));
+    }
+    else if (qd_zero_p(a) || b == 0.0)
+    {
+        qd_set_zero(r, qd_signbit(a) ^ signbit(b));
+    }
+    else
+    {
+        prod_f64(a->data[0], b, &m0, &e0);
+        prod_f64(a->data[1], b, &m1, &e1);
+        prod_f64(a->data[2], b, &m2, &e2);
+        m3 = a->data[3] * b;
 
-    sum2_f64(m1, e0, &m1, &e0);
-    sum3_f64_2(m2, e1, e0, &m2, &e1, &e0);
-    sum3_f64(m3, e2, e1, &m3, &e1);
-    e0 += e1;
+        sum2_f64(m1, e0, &m1, &e0);
+        sum3_f64_2(m2, e1, e0, &m2, &e1, &e0);
+        sum3_f64(m3, e2, e1, &m3, &e1);
+        e0 += e1;
 
-    qd_renormalize(r, m0, m1, m2, m3, e0);
+        qd_renormalize(r, m0, m1, m2, m3, e0);
+    }
 }
 
 void qd_div_d(qd_t r, qd_t a, double b)
@@ -224,32 +299,54 @@ void qd_div_d(qd_t r, qd_t a, double b)
 
 void qd_add(qd_t r, qd_t a, qd_t b)
 {
-    double x[8] = { a->data[0], a->data[1], a->data[2], a->data[3],
-                    b->data[0], b->data[1], b->data[2], b->data[3] };
-    double m[4] = { 0.0, 0.0, 0.0, 0.0 };
-    double s = 0.0, u = 0.0, v = 0.0;
-    int k = 0;
-
-    qsort(x, 8, sizeof(double), cmp_abs_f64_rev);
-    for (int i = 0; k < 4 && i < 8; ++i)
+    if (qd_nan_p(a) || qd_nan_p(b) || (qd_inf_p(a) && qd_inf_p(b) && qd_sgn(a) != qd_sgn(b)))
     {
-        accum3_f64(u, v, x[i], &s, &u, &v);
-        if (s != 0.0)
-        {
-            m[k] = s;
-            ++k;
-        }
+        qd_set_nan(r);
     }
+    else if (qd_inf_p(a))
+    {
+        qd_set(r, a);
+    }
+    else if (qd_inf_p(b))
+    {
+        qd_set(r, b);
+    }
+    else if (qd_zero_p(a))
+    {
+        qd_set(r, b);
+    }
+    else if (qd_zero_p(b))
+    {
+        qd_set(r, a);
+    }
+    else
+    {
+        double x[8] = { a->data[0], a->data[1], a->data[2], a->data[3],
+                        b->data[0], b->data[1], b->data[2], b->data[3] };
+        double m[4] = { 0.0, 0.0, 0.0, 0.0 };
+        double s = 0.0, u = 0.0, v = 0.0;
+        int k = 0;
 
-    if (k < 2) m[k + 1] = v;
-    if (k < 3) m[k] = u;
-    qd_renormalize(r, m[0], m[1], m[2], m[3], 0.0);
+        qsort(x, 8, sizeof(double), cmp_abs_f64_rev);
+        for (int i = 0; k < 4 && i < 8; ++i)
+        {
+            accum3_f64(u, v, x[i], &s, &u, &v);
+            if (s != 0.0)
+            {
+                m[k] = s;
+                ++k;
+            }
+        }
+
+        if (k < 2) m[k + 1] = v;
+        if (k < 3) m[k] = u;
+        qd_renormalize(r, m[0], m[1], m[2], m[3], 0.0);
+    }
 }
 
 void qd_sub(qd_t r, qd_t a, qd_t b)
 {
     qd_t nb;
-
     qd_neg(nb, b);
     qd_add(r, a, nb);
 }
@@ -259,26 +356,46 @@ void qd_mul(qd_t r, qd_t a, qd_t b)
     double p00, p10, p01, p20, p11, p02, p03, p12, p21, p30, p13, p22, p31,
            q00, q10, q01, q20, q11, q02, q03, q12, q21, q30;
 
-    prod_f64(a->data[0], b->data[0], &p00, &q00); // a0b0
-    prod_f64(a->data[1], b->data[0], &p10, &q10); // a1b0
-    prod_f64(a->data[0], b->data[1], &p01, &q01); // a0b1
-    prod_f64(a->data[2], b->data[0], &p20, &q20); // a2b0
-    prod_f64(a->data[1], b->data[1], &p11, &q11); // a1b1
-    prod_f64(a->data[0], b->data[2], &p02, &q02); // a0b2
-    prod_f64(a->data[3], b->data[0], &p30, &q30); // a3b0
-    prod_f64(a->data[2], b->data[1], &p21, &q21); // a2b1
-    prod_f64(a->data[1], b->data[2], &p12, &q12); // a1b2
-    prod_f64(a->data[0], b->data[3], &p03, &q03); // a0b3
-    p31 = a->data[3] * b->data[1]; // a3b1
-    p22 = a->data[2] * b->data[2]; // a2b2
-    p13 = a->data[1] * b->data[3]; // a1b3
+    if (qd_nan_p(a) || qd_nan_p(b) || (qd_inf_p(a) && qd_zero_p(b)) || 
+        (qd_zero_p(a) && qd_inf_p(b)))
+    { 
+        qd_set_nan(r);
+    }
+    else if (qd_inf_p(a))
+    {
+        qd_set(r, a);
+    }
+    else if (qd_inf_p(b))
+    {
+        qd_set_inf(r, qd_sgn(b));
+    }
+    else if (qd_zero_p(a) || qd_zero_p(b))
+    {
+        qd_set_zero(r, qd_signbit(a) ^ qd_signbit(b));
+    }
+    else
+    {
+        prod_f64(a->data[0], b->data[0], &p00, &q00); // a0b0
+        prod_f64(a->data[1], b->data[0], &p10, &q10); // a1b0
+        prod_f64(a->data[0], b->data[1], &p01, &q01); // a0b1
+        prod_f64(a->data[2], b->data[0], &p20, &q20); // a2b0
+        prod_f64(a->data[1], b->data[1], &p11, &q11); // a1b1
+        prod_f64(a->data[0], b->data[2], &p02, &q02); // a0b2
+        prod_f64(a->data[3], b->data[0], &p30, &q30); // a3b0
+        prod_f64(a->data[2], b->data[1], &p21, &q21); // a2b1
+        prod_f64(a->data[1], b->data[2], &p12, &q12); // a1b2
+        prod_f64(a->data[0], b->data[3], &p03, &q03); // a0b3
+        p31 = a->data[3] * b->data[1]; // a3b1
+        p22 = a->data[2] * b->data[2]; // a2b2
+        p13 = a->data[1] * b->data[3]; // a1b3
 
-    sum3_f64_2(p10, p01, q00, &p10, &p01, &q00);
-    sum6by3_f64(p01, q10, q01, p20, p11, p02, &p20, &q10, &q01);
-    sum9by2_f64(q00, q20, q11, q02, p30, p21, p12, p03, q10, &p30, &q20);
-    q01 += (q20 + p31 + p22 + p13 + q30 + q21 + q12 + q03);
+        sum3_f64_2(p10, p01, q00, &p10, &p01, &q00);
+        sum6by3_f64(p01, q10, q01, p20, p11, p02, &p20, &q10, &q01);
+        sum9by2_f64(q00, q20, q11, q02, p30, p21, p12, p03, q10, &p30, &q20);
+        q01 += (q20 + p31 + p22 + p13 + q30 + q21 + q12 + q03);
 
-    qd_renormalize(r, p00, p10, p20, p30, q01);
+        qd_renormalize(r, p00, p10, p20, p30, q01);
+    }
 }
 
 void qd_div(qd_t res, qd_t a, qd_t b)
@@ -286,23 +403,30 @@ void qd_div(qd_t res, qd_t a, qd_t b)
     qd_t r, m;
     double q[4];
 
-    q[0] = a->data[0] / b->data[0];
-    qd_mul_d(m, b, q[0]);
-    qd_sub(r, a, m);
-    
-    q[1] = r->data[0] / b->data[0];
-    qd_mul_d(m, b, q[1]);
-    qd_sub(r, r, m);
+    if (qd_inf_p(a) || qd_inf_p(b) || qd_nan_p(a) || qd_nan_p(b) || qd_zero_p(b))
+    {
+        qd_set_nan(r);
+    }
+    else
+    {
+        q[0] = a->data[0] / b->data[0];
+        qd_mul_d(m, b, q[0]);
+        qd_sub(r, a, m);
+        
+        q[1] = r->data[0] / b->data[0];
+        qd_mul_d(m, b, q[1]);
+        qd_sub(r, r, m);
 
-    q[2] = r->data[0] / b->data[0];
-    qd_mul_d(m, b, q[2]);
-    qd_sub(r, r, m);
+        q[2] = r->data[0] / b->data[0];
+        qd_mul_d(m, b, q[2]);
+        qd_sub(r, r, m);
 
-    q[3] = r->data[0] / b->data[0];
-    qd_mul_d(m, b, q[3]);
-    qd_sub(r, r, m);
-    
-    qd_renormalize(res, q[0], q[1], q[2], q[3], r->data[0] / b->data[0]);
+        q[3] = r->data[0] / b->data[0];
+        qd_mul_d(m, b, q[3]);
+        qd_sub(r, r, m);
+        
+        qd_renormalize(res, q[0], q[1], q[2], q[3], r->data[0] / b->data[0]);
+    }
 }
 
 void qd_powi(qd_t r, qd_t a, int b)
@@ -338,61 +462,70 @@ void qd_sqrt(qd_t r, qd_t a)
 {
     qd_t x0, t;
 
-    qd_set_d(x0, sqrt(a->data[0]));  // initial guess
-
-    // Newton's iteration: x(n+1) = x(n) + [a / x(n) -  x(n)] / 2
-    // quadratically convergent, around 2 iterations required
-    for (int i = 0; i < 3; ++i)
+    if (qd_signbit(a))
     {
-        qd_div(t, a, x0);
-        qd_sub(t, t, x0);
-
-        t->data[0] /= 2.0;
-        t->data[1] /= 2.0;
-        t->data[2] /= 2.0;
-        t->data[3] /= 2.0;
-
-        qd_add(x0, t, x0);
+        qd_set_nan(r);
     }
+    else
+    {
+        qd_set_d(x0, sqrt(a->data[0]));  // initial guess
 
-    qd_set(r, x0);
+        // Newton's iteration: x(n+1) = x(n) + [a / x(n) -  x(n)] / 2
+        // quadratically convergent, around 2 iterations required
+        for (int i = 0; i < 3; ++i)
+        {
+            qd_div(t, a, x0);
+            qd_sub(t, t, x0);
+
+            t->data[0] /= 2.0;
+            t->data[1] /= 2.0;
+            t->data[2] /= 2.0;
+            t->data[3] /= 2.0;
+
+            qd_add(x0, t, x0);
+        }
+
+        qd_set(r, x0);
+    }
 }
 
 void qd_nroot(qd_t r, qd_t a, int n)
 {
-    qd_t x0, t, s;
-    char* str;
+    qd_t abs_a, x0, t, s;
 
-    if (n < 0) // x^(1/(-n)) => 1 / x^(1/n)
+    if (qd_signbit(a) && n % 2 == 0)
+    {
+        qd_set_nan(r);
+    }
+    else if (n < 0) // x^(1/(-n)) => 1 / x^(1/n)
     {
         qd_nroot(t, a, -n);
         qd_div(r, QD_ONE, t);
     }
     else if (n == 0) // nan
     {
-
+        qd_set_nan(r);
     }
     else
     {
-        // initial guess: nth root of a0
-        qd_set_d(x0, pow(a->data[0], (1.0 / ((double) n)))); 
-    
-        str = qd_to_str(x0, 0);
-	    printf("nroot init: %.17g -> %s\n", a->data[0], str);
-	    free(str);
+        
+        // initial guess: nth root of |a0|
+        qd_abs(abs_a, a);
+        qd_set_d(x0, pow(abs_a->data[0], (1.0 / ((double) n))));
 
         // Newton's iteration: x(k+1) = (1/n)*[(n-1)*x(k) + a / x(k)^(n-1)]
         // quadratically convergent, around 2 iterations required
         for (int i = 0; i < 3; ++i)
         {
             qd_powi(t, x0, n - 1);
-            qd_div(t, a, t);
+            qd_div(t, abs_a, t);
             qd_mul_d(s, x0, (double)(n - 1));
             qd_add(t, s, t);
             qd_div_d(x0, t, (double) n);
         }
 
         qd_set(r, x0);
+        if (qd_signbit(a))  qd_neg(r, r);
     }
 }
 
@@ -411,37 +544,65 @@ int qd_cmp(qd_t a, qd_t b)
 
 int qd_sgn(qd_t x)
 {
-    return (x->data[0] < 0.0);
+    return (0.0 < x->data[0]) - (x->data[0] < 0.0);
 }
 
-int qd_is_zero(qd_t x)
+int qd_zero_p(qd_t x)
 {
     return (x->data[0] == 0.0);
 }
 
-int qd_is_nan(qd_t x)
+int qd_nan_p(qd_t x)
 {
     return isnan(x->data[0]);
 }
 
-int qd_is_inf(qd_t x)
+int qd_inf_p(qd_t x)
 {
     return isinf(x->data[0]);
 }
 
-int qd_is_number(qd_t x)
+int qd_number_p(qd_t x)
 {
     return !isnan(x->data[0]) && !isinf(x->data[0]);
 }
 
-// **** I/O functions **** //
+// **** Conversion functions **** //
 
-char* qd_to_str(qd_t qd, int len)
+double qd_get_d(qd_t qd)
+{
+    return qd->data[0];
+}
+
+char* qd_get_str(qd_t qd, int len)
 {
     qd_t tmp;
     char *out, *pstr, *pend;
     int digit, abs_exp, exp_len;
     int exp = 0;
+
+    if (qd_nan_p(qd))
+    {
+        out = malloc(4 * sizeof(char));
+        strncpy(out, "nan", 4);
+        return out;
+    }
+    
+    if (qd_inf_p(qd))
+    {
+        if (qd_signbit(qd))    
+        {
+            out = malloc(5 * sizeof(char));
+            strncpy(out, "-inf", 5);
+            return out;
+        }
+        else
+        {
+            out = malloc(4 * sizeof(char));
+            strncpy(out, "inf", 4);
+            return out;
+        }
+    }
 
     // normalize qd => x * 10^n where 1 <= x < 10
     qd_abs(tmp, qd);  
@@ -457,7 +618,7 @@ char* qd_to_str(qd_t qd, int len)
         }
     }
 
-    if (qd_cmp(tmp, QD_ONE) < 0)
+    if (!qd_zero_p(tmp) && qd_cmp(tmp, QD_ONE) < 0)
     {
         for (int p10 = 8; p10 >= 0; --p10)
         {
@@ -476,7 +637,7 @@ char* qd_to_str(qd_t qd, int len)
     }
 
     if (len == 0)           len = 66; // default string length
-    if (qd_sgn(tmp))        ++len;
+    if (qd_signbit(tmp))    ++len;
 
     abs_exp = abs(exp);
     if (abs_exp >= 100)     exp_len = 4; // exponent sign
@@ -488,7 +649,7 @@ char* qd_to_str(qd_t qd, int len)
     pstr = out;
     pend = out + len - 1;
 
-    if (qd_sgn(qd))
+    if (qd_signbit(qd))
     {
         *pstr = '-';
         ++pstr;
@@ -505,7 +666,7 @@ char* qd_to_str(qd_t qd, int len)
     *pstr = '.';
     ++pstr;
 
-    while (!qd_is_zero(tmp) && (pstr - out) < (len - exp_len - 2))
+    while (!qd_zero_p(tmp) && (pstr - out) < (len - exp_len - 2))
     {
         digit = (int)tmp->data[0];
         if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
@@ -542,6 +703,11 @@ char* qd_to_str(qd_t qd, int len)
 
 // **** Miscellaneous functions **** //
 
+int qd_signbit(qd_t qd)
+{
+    return (qd->data[0] < 0.0);
+}
+
 void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double a4)
 {
     double t[5];
@@ -554,7 +720,7 @@ void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double 
     quick_sum2_f64(a0, s, &t[0], &t[1]);
 
     s = t[0];
-    qd_set_zero(qd);
+    qd_set_zero(qd, 1);
     for (int i = 1; i < 5 && k < 4; ++i)
     {
         quick_sum2_f64(s, t[i], &s, &t[0]); 

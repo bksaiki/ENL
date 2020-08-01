@@ -46,6 +46,9 @@ void sum9by2_f64(double a0, double a1, double a2, double a3, double b0, double b
 // or 0 if |x| == |y|.
 int cmp_abs_f64_rev(const void *x, const void *y);
 
+// Implements the signum function.
+int sgn(double val);
+
 // Returns the power of b raised to the e.
 int powi(int b, int e);
 
