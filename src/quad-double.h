@@ -1,6 +1,7 @@
 #ifndef _FLOATTYPES_QUAD_DOUBLE_H_
 #define _FLOATTYPES_QUAD_DOUBLE_H_
 
+#include <stdint.h>
 #include "common.h"
 
 struct qd_struct_t
@@ -14,6 +15,8 @@ typedef struct qd_struct_t qd_t[1];
 
 void qd_set(qd_t qd, qd_t x);
 void qd_set_d(qd_t qd, double x);
+void qd_set_ui(qd_t qd, uint64_t x);
+void qd_set_si(qd_t qd, int64_t x);
 void qd_set_str(qd_t qd, char* str);
 
 void qd_set_nan(qd_t qd);
@@ -36,13 +39,13 @@ void qd_mul(qd_t r, qd_t a, qd_t b);
 void qd_div(qd_t r, qd_t a, qd_t b);
 
 void qd_powi(qd_t r, qd_t a, int b);
-
 void qd_sqrt(qd_t r, qd_t a);
 void qd_nroot(qd_t r, qd_t a, int n);
 
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b);
+int qd_cmpabs(qd_t a, qd_t b);
 int qd_sgn(qd_t x);
 
 int qd_zero_p(qd_t x);
@@ -53,6 +56,8 @@ int qd_number_p(qd_t x);
 // **** Conversion functions **** //
 
 double qd_get_d(qd_t qd);
+uint64_t qd_get_ui(qd_t qd);
+int64_t qd_get_si(qd_t qd);
 char* qd_get_str(qd_t qd, int len);
 
 // **** Miscellaneous functions **** //

@@ -6,11 +6,21 @@
 #include <string.h>
 #include "quad-double.h"
 
-struct qd_struct_t qd_powers_10[9] = {
-    { .data[0] = 10.0, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // 10^1
-    { .data[0] = 1e+2, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // 10^2
-    { .data[0] = 1e+4, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // 10^4
-    { .data[0] = 1e+8, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                      // ...
+struct qd_struct_t qd_powers_10[19] = {
+    { .data[0] = 1e-256, .data[1] = 2.2671708827212437e-273, .data[2] = -1.1994609675448683e-289, .data[3] = -3.060993260309854e-306 },
+    { .data[0] = 1e-128, .data[1] = 2-5.401408859568103e-145, .data[2] = -4.759216114517928e-162, .data[3] = -3.583550944062863e-178 },
+    { .data[0] = 1e-64, .data[1] = 23.469426116645307e-81, .data[2] = 9.899885481330491e-98, .data[3] = -2.825571992850639e-114 },
+    { .data[0] = 1e-32, .data[1] = 2-5.59673099762419e-49, .data[2] = 3.0688625784648003e-66, .data[3] = -2.3719300994621642e-82 },
+    { .data[0] = 1e-16, .data[1] = 2.0902213275965398e-33, .data[2] = -1.3550063967589306e-49, .data[3] = 8.651653255873321e-66 },      // ...
+    { .data[0] = 1e-8, .data[1] = -2.092256083012847e-25, .data[2] = -1.582638574173095e-41, .data[3] = 5.4982215447355565e-59 },       // 10^-4
+    { .data[0] = 1e-4, .data[1] = -4.79217360238593e-21, .data[2] = 3.442599775592184e-37, .data[3] = -5.078252949175172e-54 },         // 10^-3
+    { .data[0] = 1e-2, .data[1] = -2.0816681711721684e-19, .data[2] = -7.703719777548944e-36, .data[3] = 1.6036588260553173e-52 },      // 10^-2
+    { .data[0] = 1e-1, .data[1] = -5.551115123125783e-18, .data[2] = 3.0814879110195775e-34, .data[3] = -1.7105694144590053e-50 },      // 10^-1
+    { .data[0] = 1.0, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                                                                 // 10^0 
+    { .data[0] = 10.0, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                                                                // 10^1
+    { .data[0] = 1e+2, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                                                                // 10^2
+    { .data[0] = 1e+4, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                                                                // 10^4
+    { .data[0] = 1e+8, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                                                                // ...
     { .data[0] = 1e+16, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 },                        
     { .data[0] = 1e+32, .data[1] = -5366162204393472.0, .data[2] = 0.0, .data[3] = 0.0 },
     { .data[0] = 1e+64, .data[1] = -2.1320419009454396e+47, .data[2] = -1.2300353422800673e+31, .data[3] = 0.0 },
@@ -18,19 +28,8 @@ struct qd_struct_t qd_powers_10[9] = {
     { .data[0] = 1e+256, .data[1] = -3.012765990014054e+239, .data[2] = -3.132205662339866e+222, .data[3] = -8.48134226662446e+205 }
 };
 
-struct qd_struct_t qd_neg_powers_10[9] = {
-    { .data[0] = 1e-1, .data[1] = -5.551115123125783e-18, .data[2] = 3.0814879110195775e-34, .data[3] = -1.7105694144590053e-50 },      // 10^-1
-    { .data[0] = 1e-2, .data[1] = -2.0816681711721684e-19, .data[2] = -7.703719777548944e-36, .data[3] = 1.6036588260553173e-52 },      // 10^-2
-    { .data[0] = 1e-4, .data[1] = -4.79217360238593e-21, .data[2] = 3.442599775592184e-37, .data[3] = -5.078252949175172e-54 },         // 10^-3
-    { .data[0] = 1e-8, .data[1] = -2.092256083012847e-25, .data[2] = -1.582638574173095e-41, .data[3] = 5.4982215447355565e-59 },       // 10^-4
-    { .data[0] = 1e-16, .data[1] = 2.0902213275965398e-33, .data[2] = -1.3550063967589306e-49, .data[3] = 8.651653255873321e-66 },      // ...
-    { .data[0] = 1e-32, .data[1] = 2-5.59673099762419e-49, .data[2] = 3.0688625784648003e-66, .data[3] = -2.3719300994621642e-82 },
-    { .data[0] = 1e-64, .data[1] = 23.469426116645307e-81, .data[2] = 9.899885481330491e-98, .data[3] = -2.825571992850639e-114 },
-    { .data[0] = 1e-128, .data[1] = 2-5.401408859568103e-145, .data[2] = -4.759216114517928e-162, .data[3] = -3.583550944062863e-178 },
-    { .data[0] = 1e-256, .data[1] = 2.2671708827212437e-273, .data[2] = -1.1994609675448683e-289, .data[3] = -3.060993260309854e-306 }
-};
-
-qd_t QD_ONE = { { .data[0] = 1.0, .data[1] = 0.0, .data[2] = 0.0, .data[3] = 0.0 } };
+struct qd_struct_t *QD_ONE = &qd_powers_10[9];
+struct qd_struct_t *QD_TEN = &qd_powers_10[10];
 
 // **** Initialization functions **** //
 
@@ -48,6 +47,27 @@ void qd_set_d(qd_t qd, double x)
     qd->data[1] = 0.0;
     qd->data[2] = 0.0;
     qd->data[3] = 0.0;
+}
+
+void qd_set_ui(qd_t qd, uint64_t x)
+{
+    qd_t t, pow10;
+
+    qd_set_zero(qd, 1);
+    qd_set_d(pow10, 1);
+    while (x > 0)
+    {
+        qd_mul_d(t, pow10, (double)(x % 4294967296U));
+        qd_add(qd, qd, t);
+        qd_mul_d(pow10, pow10, (double)4294967296U);
+        x /= 4294967296U;
+    }
+}
+
+void qd_set_si(qd_t qd, int64_t x)
+{
+    qd_set_ui(qd, ((x < 0) ? -x : x));
+    if (x < 0)  qd_neg(qd, qd);
 }
 
 void qd_set_str(qd_t qd, char* str)
@@ -160,7 +180,7 @@ void qd_set_str(qd_t qd, char* str)
         {
             if (abspow10 >= pow2)
             {
-                qd_mul(qd10, &qd_powers_10[i], qd10);
+                qd_mul(qd10, (QD_TEN + i), qd10); // pointer arithmetic
                 abspow10 -= pow2;
             }
         }
@@ -542,6 +562,21 @@ int qd_cmp(qd_t a, qd_t b)
     return 0.0;
 }
 
+int qd_cmpabs(qd_t a, qd_t b)
+{
+    qd_t neg;
+
+    if (qd_signbit(a))
+    {
+        qd_neg(neg, b);
+        return qd_cmp(a, neg);
+    }
+    else
+    {
+        return qd_cmp(a, b);
+    }  
+}
+
 int qd_sgn(qd_t x)
 {
     return (0.0 < x->data[0]) - (x->data[0] < 0.0);
@@ -572,6 +607,45 @@ int qd_number_p(qd_t x)
 double qd_get_d(qd_t qd)
 {
     return qd->data[0];
+}
+
+uint64_t qd_get_ui(qd_t qd)
+{
+    qd_t tmp, acc, lim;
+    uint64_t r, t;
+
+    r = 0;
+    qd_set_ui(lim, UINT64_MAX);
+    if (qd_signbit(qd) || qd_nan_p(qd))     return 0;
+    if (qd_cmp(qd, lim) > 0)                return UINT64_MAX;
+
+    // first pass, correct if first component is too large
+    qd_set(tmp, qd);
+    t = (tmp->data[0] == 1.8446744073709552e+19) ? UINT64_MAX : (uint64_t)tmp->data[0];         
+    qd_set_ui(acc, t);
+    qd_sub(tmp, tmp, acc);
+    r += t;
+
+    // second pass when (qd > 2^53)
+    t = (uint64_t)tmp->data[0];      
+    qd_set_ui(acc, t);
+    qd_sub(tmp, tmp, acc);
+    return r + t;
+}
+
+int64_t qd_get_si(qd_t qd)
+{
+    qd_t lo, hi, tmp;
+
+    if (qd_nan_p(qd))   return 0;
+
+    qd_set_si(lo, INT64_MIN);
+    qd_set_si(hi, INT64_MAX);
+    if (qd_cmp(qd, lo) < 0)     return INT64_MIN;
+    if (qd_cmp(qd, hi) > 0)     return INT64_MAX;
+
+    qd_abs(tmp, qd);
+    return (int64_t)qd_get_ui(tmp) * qd_sgn(qd);
 }
 
 char* qd_get_str(qd_t qd, int len)
@@ -606,34 +680,28 @@ char* qd_get_str(qd_t qd, int len)
 
     // normalize qd => x * 10^n where 1 <= x < 10
     qd_abs(tmp, qd);  
-    if (qd_cmp(tmp, &qd_powers_10[0]) >= 0) // qd >= 10
+    if (qd_cmp(tmp, QD_TEN) >= 0) // qd >= 10
     {
         for (int p10 = 8; p10 >= 0; --p10)
         {
-            if (qd_cmp(tmp, &qd_powers_10[p10]) >= 0)
+            if (qd_cmp(tmp, (QD_TEN + p10)) >= 0)
             {
                 exp += powi(2, p10);
-                qd_div(tmp, tmp, &qd_powers_10[p10]);
+                qd_div(tmp, tmp, (QD_TEN + p10));
             }
         }
     }
 
     if (!qd_zero_p(tmp) && qd_cmp(tmp, QD_ONE) < 0)
     {
-        for (int p10 = 8; p10 >= 0; --p10)
+        for (int p10 = 9; p10 >= 0; --p10)
         {
-            if (qd_cmp(tmp, &qd_neg_powers_10[p10]) <= 0)
+            if (qd_cmp(tmp, (QD_ONE - p10)) <= 0)
             {
-                exp -= powi(2, p10);
-                qd_div(tmp, tmp, &qd_neg_powers_10[p10]);
+                exp -= powi(2, p10 - 1);
+                qd_div(tmp, tmp, (QD_ONE - p10));
             }
         }     
-
-        if (qd_cmp(tmp, QD_ONE) < 0)
-        {
-            exp -= 1;
-            qd_mul_d(tmp, tmp, 10);
-        }
     }
 
     if (len == 0)           len = 66; // default string length
@@ -666,13 +734,15 @@ char* qd_get_str(qd_t qd, int len)
     *pstr = '.';
     ++pstr;
 
-    while (!qd_zero_p(tmp) && (pstr - out) < (len - exp_len - 2))
+    while (!qd_zero_p(tmp) && tmp->data[0] != 10.0 && (pstr - out) < (len - exp_len - 2))
     {
         digit = (int)tmp->data[0];
         if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
         *pstr = (char)digit + '0';
         qd_sub_d(tmp, tmp, (double)digit);
         qd_mul_d(tmp, tmp, 10.0);
+        if (tmp->data[0] == 10.0 && tmp->data[1] < 0) 
+            *pstr = (char)(digit + 1) + '0'; // correct for repeating 9's
         ++pstr;
     }
 

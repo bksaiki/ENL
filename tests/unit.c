@@ -87,8 +87,6 @@ int main()
         free(str);
     }
 
-    {
-    }
     
     return (int)(!status);
 }
