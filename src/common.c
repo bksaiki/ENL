@@ -1,5 +1,5 @@
 #include <math.h>
-#include "common.h"
+#include "../include/common.h"
 
 void split_f64(double x, double *hi, double *lo)
 {

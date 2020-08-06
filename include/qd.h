@@ -1,5 +1,5 @@
-#ifndef _FLOATTYPES_QUAD_DOUBLE_H_
-#define _FLOATTYPES_QUAD_DOUBLE_H_
+#ifndef _ENL_QD_H_
+#define _ENL_QD_H_
 
 #include <stdint.h>
 #include "common.h"
@@ -42,6 +42,8 @@ void qd_powi(qd_t r, qd_t a, int b);
 void qd_sqrt(qd_t r, qd_t a);
 void qd_nroot(qd_t r, qd_t a, int n);
 
+void qd_exp(qd_t r, qd_t a);
+
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b);
@@ -65,5 +67,21 @@ char* qd_get_str(qd_t qd, int len);
 int qd_signbit(qd_t qd);
 
 void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double a4);
+
+// **** Constants **** //
+
+extern qd_t QD_E,
+            QD_LOG2E,
+            QD_LOG10E,
+            QD_LN2,
+            QD_LN10,
+            QD_PI,
+            QD_PI_2,
+            QD_PI_4,
+            QD_1_PI,
+            QD_2_PI,
+            QD_2_SQRTPI,
+            QD_SQRT2,
+            QD_SQRT1_2;
 
 #endif

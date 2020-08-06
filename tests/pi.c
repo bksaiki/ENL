@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../src/quad-double.h"
+#include "../include/qd.h"
 
 int main(int argc, char** argv) 
 {

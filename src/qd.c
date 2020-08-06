@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "quad-double.h"
+#include "../include/qd.h"
+
+// **** Constants **** //
 
 struct qd_struct_t qd_powers_10[19] = {
     { .data[0] = 1e-256, .data[1] = 2.2671708827212437e-273, .data[2] = -1.1994609675448683e-289, .data[3] = -3.060993260309854e-306 },
@@ -544,9 +546,14 @@ void qd_nroot(qd_t r, qd_t a, int n)
             qd_div_d(x0, t, (double) n);
         }
 
-        qd_set(r, x0);
-        if (qd_signbit(a))  qd_neg(r, r);
+        if (qd_signbit(a))  qd_neg(r, x0);
+        else                qd_set(r, x0);
     }
+}
+
+void qd_exp(qd_t r, qd_t a)
+{
+    qd_set(r, QD_E);
 }
 
 // **** Comparison functions **** //

@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../src/common.h"
-#include "../src/quad-double.h"
+#include "../include/common.h"
+#include "../include/qd.h"
 
 #define _GNU_SOURCE
 
