@@ -33,6 +33,13 @@ struct qd_struct_t qd_powers_10[19] = {
 struct qd_struct_t *QD_ONE = &qd_powers_10[9];
 struct qd_struct_t *QD_TEN = &qd_powers_10[10];
 
+// **** Debugging **** //
+void qd_debug(qd_t r, const char* msg)
+{
+    if (msg == NULL)    printf("%.17g + %.17g + %.17g + %.17g\n", r->data[0], r->data[1], r->data[2], r->data[3]);
+    else                printf("%s: %.17g + %.17g + %.17g + %.17g\n", msg, r->data[0], r->data[1], r->data[2], r->data[3]);
+}
+
 // **** Initialization functions **** //
 
 void qd_set(qd_t qd, qd_t x)
@@ -553,7 +560,95 @@ void qd_nroot(qd_t r, qd_t a, int n)
 
 void qd_exp(qd_t r, qd_t a)
 {
-    qd_set(r, QD_E);
+    qd_t arg, m, denom, term, accum, tmp;
+    int mi;
+
+    if (qd_nan_p(a)) // NaN input
+    {
+        qd_set_nan(r);
+        return;
+    }
+    else if (a->data[0] > 709) // input too large
+    {
+        qd_set_inf(r, 1);
+        return;
+    }  
+    else if (a->data[0] < -745) // input too small
+    {
+        qd_set_zero(r, 1);
+        return;
+    }
+    else if (qd_zero_p(a))
+    {
+        qd_set(r, QD_ONE);
+        return;
+    }
+    else if (qd_cmp(a, QD_ONE) == 0)
+    {
+        qd_set(r, QD_E);
+        return;
+    }
+
+    // Argument reduction
+    // e^(k*r + m*log(2)) = (2^m)*(e^r)^k
+    qd_set(arg, a);
+    qd_div(m, arg, QD_LN2); 
+    mi = (int)round(m->data[0]);
+
+    qd_set_si(m, mi); // nearest integer
+    qd_mul(tmp, m, QD_LN2);
+    qd_sub(arg, arg, tmp);
+    qd_div_d(arg, arg, 256.0);
+
+    qd_set_d(accum, 1.0);
+    qd_set_d(denom, 1.0);
+    qd_set(term, arg);
+
+    for (int i = 1; i < 18; ++i)
+    {
+        qd_div(tmp, term, denom); // ith term
+        qd_add(accum, accum, tmp);
+        qd_mul(term, term, arg); // update term
+        qd_mul_d(denom, denom, (double)(i + 1)); // update denom
+    }
+
+    qd_powi(accum, accum, 256);
+    qd_set_d(tmp, 2.0);
+    qd_powi(tmp, tmp, mi);
+    qd_mul(r, accum, tmp);
+}   
+
+void qd_log(qd_t r, qd_t a)
+{
+    qd_t x, t;
+
+    if (qd_nan_p(x) || qd_sgn(a) <= 0)
+    {
+        qd_set_nan(r);
+    }
+    else if (qd_inf_p(a))
+    {   
+        qd_set_inf(r, 1);
+    }
+    else
+    {
+        // initial guess: log(a0)
+        qd_set_d(x, log(a->data[0]));
+
+        // Newton's iteration: x(k+1) = x(k) + a*exp(-x(k)) - 1
+        // quadratically convergent, around 2 iterations required
+
+        for (int i = 0; i < 3; ++i)
+        {
+            qd_neg(t, x);
+            qd_exp(t, t);
+            qd_mul(t, t, a);
+            qd_add(t, t, x);
+            qd_sub_d(x, t, 1.0);
+        }
+
+        qd_set(r, x);
+    }
 }
 
 // **** Comparison functions **** //
@@ -703,7 +798,7 @@ char* qd_get_str(qd_t qd, int len)
     {
         for (int p10 = 9; p10 >= 0; --p10)
         {
-            if (qd_cmp(tmp, (QD_ONE - p10)) <= 0)
+            if (qd_cmp(tmp, (QD_ONE - p10)) < 0)
             {
                 exp -= powi(2, p10 - 1);
                 qd_div(tmp, tmp, (QD_ONE - p10));

@@ -117,10 +117,10 @@ int sgn(double val)
 
 int powi(int b, int e)
 {
-    if (e < 0)      return -1;
+    if (e < 0)      return 0;
     if (e == 0)     return 1;
     if (e == 1)     return b;
-    if (e % 2)      return powi(b, e - 1) * b;
+    if (e % 2)      return b * powi(b, e- 1);
     
     int i = powi(b, e / 2);
     return i * i;

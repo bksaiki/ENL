@@ -43,6 +43,7 @@ void qd_sqrt(qd_t r, qd_t a);
 void qd_nroot(qd_t r, qd_t a, int n);
 
 void qd_exp(qd_t r, qd_t a);
+void qd_log(qd_t r, qd_t a);
 
 // **** Comparison functions **** //
 
