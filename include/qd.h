@@ -11,6 +11,10 @@ struct qd_struct_t
 
 typedef struct qd_struct_t qd_t[1];
 
+// *** Debugging *** //
+
+void qd_debug(qd_t r, const char* msg);
+
 // **** Initialization functions **** //
 
 void qd_set(qd_t qd, qd_t x);
@@ -44,6 +48,7 @@ void qd_nroot(qd_t r, qd_t a, int n);
 
 void qd_exp(qd_t r, qd_t a);
 void qd_log(qd_t r, qd_t a);
+void qd_pow(qd_t r, qd_t a, qd_t b);
 
 // **** Comparison functions **** //
 
@@ -56,6 +61,8 @@ int qd_nan_p(qd_t x);
 int qd_inf_p(qd_t x);
 int qd_number_p(qd_t x);
 
+int qd_cmp_d(qd_t x, double d);
+
 // **** Conversion functions **** //
 
 double qd_get_d(qd_t qd);
@@ -66,6 +73,9 @@ char* qd_get_str(qd_t qd, int len);
 // **** Miscellaneous functions **** //
 
 int qd_signbit(qd_t qd);
+
+int qd_int_p(qd_t qd);
+int qd_odd_int_p(qd_t qd);
 
 void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double a4);
 

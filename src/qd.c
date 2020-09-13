@@ -34,6 +34,7 @@ struct qd_struct_t *QD_ONE = &qd_powers_10[9];
 struct qd_struct_t *QD_TEN = &qd_powers_10[10];
 
 // **** Debugging **** //
+
 void qd_debug(qd_t r, const char* msg)
 {
     if (msg == NULL)    printf("%.17g + %.17g + %.17g + %.17g\n", r->data[0], r->data[1], r->data[2], r->data[3]);
@@ -499,19 +500,16 @@ void qd_sqrt(qd_t r, qd_t a)
     {
         qd_set_d(x0, sqrt(a->data[0]));  // initial guess
 
-        // Newton's iteration: x(n+1) = x(n) + [a / x(n) -  x(n)] / 2
+        // Newton's iteration: x(n+1) = [x(n) + a / x(n)] / 2
         // quadratically convergent, around 2 iterations required
         for (int i = 0; i < 3; ++i)
         {
             qd_div(t, a, x0);
-            qd_sub(t, t, x0);
-
+            qd_add(t, x0, t);
             t->data[0] /= 2.0;
             t->data[1] /= 2.0;
             t->data[2] /= 2.0;
             t->data[3] /= 2.0;
-
-            qd_add(x0, t, x0);
         }
 
         qd_set(r, x0);
@@ -622,7 +620,7 @@ void qd_log(qd_t r, qd_t a)
 {
     qd_t x, t;
 
-    if (qd_nan_p(x) || qd_sgn(a) <= 0)
+    if (qd_nan_p(x) || qd_signbit(a) || qd_zero_p(a))
     {
         qd_set_nan(r);
     }
@@ -648,6 +646,103 @@ void qd_log(qd_t r, qd_t a)
         }
 
         qd_set(r, x);
+    }
+}
+
+void qd_pow(qd_t r, qd_t a, qd_t b)
+{
+    // Special values are handled as described by the ISO C99 and IEEE 754-2008 standards
+    if (qd_zero_p(a))
+    {
+        if (qd_signbit(b))
+        {
+            if (qd_odd_int_p(b))    qd_set_inf(r, qd_sgn(a)); // pow(0, negative odd int) = +-inf
+            else                    qd_set_inf(r, 1); // pow(0, negative) = +inf
+        }
+        else
+        {
+            if (qd_odd_int_p(b))    qd_set_inf(r, qd_sgn(a)); // pow(0, positive odd int) = +-inf
+            else                    qd_set_zero(r, 1); // pow(0, positive) = +0
+        }  
+    }
+    else if ((qd_cmp_d(a, -1.0) == 0 && qd_inf_p(b)) ||     // pow(-1, +-inf) = 1, 
+             (qd_cmp_d(a, 1.0) == 0)  ||                    // pow(1, any) = 1, even for NaN, 
+             qd_zero_p(b))                                  // pow(any, 0) = 1, even for NaN
+    {
+        qd_set_d(r, 1.0);                       
+    }
+    else if (qd_inf_p(b))
+    {
+        if (qd_signbit(b))
+        {
+            if (qd_cmp_d(a, -1.0) > 0 && qd_cmp_d(a, 1.0) < 0)
+                qd_set_inf(r, 1);   // pow(-1 < x < 1, -inf) = +inf
+            else    
+                qd_set_zero(r, 1);  // pow(abs(x) > 1, -inf) = +0
+        }
+        else
+        {
+            if (qd_cmp_d(a, -1.0) > 0 && qd_cmp_d(a, 1.0) < 0)
+                qd_set_zero(r, 1);   // pow(-1 < x < 1, -inf) = +0
+            else    
+                qd_set_inf(r, 1);    // pow(abs(x) > 1, -inf) = +inf
+        }  
+    }
+    else if (qd_inf_p(a))
+    {
+        if (qd_signbit(a))
+        {
+            if (qd_signbit(b))
+            {
+                if (qd_odd_int_p(b))    qd_set_zero(r, -1);     // pow(-inf, negative odd int) = -0
+                else                    qd_set_zero(r, 1);      // pow(-inf, negative) = 0
+            }
+            else
+            {
+                if (qd_odd_int_p(b))    qd_set_inf(r, -1);      // pow(-inf, positive odd int) = -inf
+                else                    qd_set_inf(r, 1);       // pow(-inf, positive) = +inf
+            }
+        }
+        else
+        {
+            if (qd_signbit(b))  qd_set_zero(r, 1);  // pow(+inf, negative) = +0
+            else                qd_set_inf(r, 1);   // pow(+inf, positive) = +inf
+        }
+    }
+    else if (qd_signbit(a))
+    {
+        if (qd_int_p(b))
+        {
+            qd_t t;
+
+            qd_abs(t, a);
+            qd_pow(t, t, b);
+            if (qd_odd_int_p(b))    qd_neg(r, t); // pow(-x, odd int) = -(x^(odd int))
+            else                    qd_set(r, t); // pow(-x, even int) = x^(even int)
+        }
+        else
+        {
+            qd_set_nan(r); // pow(finite negative, finite non-integer) = NaN
+        }
+    }
+    else
+    {
+        qd_t t, u, xn, la;
+
+        qd_set_d(xn, pow(a->data[0], b->data[0]));
+        qd_log(la, a);
+
+        // Newton's method: x(k+1) = x(k) * (b*log(a) - log(x(k)) + 1)
+        for (int i = 0; i < 3; ++i)
+        {
+            qd_log(u, xn);
+            qd_sub_d(u, u, 1.0);
+            qd_mul(t, b, la);
+            qd_sub(t, t, u);
+            qd_mul(xn, xn, t);
+        }
+
+        qd_set(r, xn);
     }
 }
 
@@ -702,6 +797,13 @@ int qd_inf_p(qd_t x)
 int qd_number_p(qd_t x)
 {
     return !isnan(x->data[0]) && !isinf(x->data[0]);
+}
+
+int qd_cmp_d(qd_t x, double d)
+{
+    qd_t y;
+    qd_set_d(y, d);
+    return qd_cmp(x, y);
 }
 
 // **** Conversion functions **** //
@@ -827,7 +929,7 @@ char* qd_get_str(qd_t qd, int len)
 
     // round down if next significand negative and current significand is exact integer
     digit = (int)tmp->data[0];
-    if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
+    if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0)) --digit;
     *pstr = (char)digit + '0';
     ++pstr;
 
@@ -836,15 +938,13 @@ char* qd_get_str(qd_t qd, int len)
     *pstr = '.';
     ++pstr;
 
-    while (!qd_zero_p(tmp) && tmp->data[0] != 10.0 && (pstr - out) < (len - exp_len - 2))
+    while (!qd_zero_p(tmp) && (pstr - out) < (len - exp_len - 2))
     {
         digit = (int)tmp->data[0];
-        if (((double)digit == tmp->data[0]) && (tmp->data[1] < 0.0))  --digit;
+        if (digit == 10.0 && tmp->data[1] < 0)  --digit;
         *pstr = (char)digit + '0';
         qd_sub_d(tmp, tmp, (double)digit);
         qd_mul_d(tmp, tmp, 10.0);
-        if (tmp->data[0] == 10.0 && tmp->data[1] < 0) 
-            *pstr = (char)(digit + 1) + '0'; // correct for repeating 9's
         ++pstr;
     }
 
@@ -878,6 +978,29 @@ char* qd_get_str(qd_t qd, int len)
 int qd_signbit(qd_t qd)
 {
     return (qd->data[0] < 0.0);
+}
+
+int qd_int_p(qd_t qd)
+{
+    // qd is an integer if every component is an integer
+    return (qd->data[0] == trunc(qd->data[0]) && qd->data[1] == trunc(qd->data[1]) &&
+            qd->data[2] == trunc(qd->data[2]) && qd->data[3] == trunc(qd->data[3]));
+}
+
+int qd_odd_int_p(qd_t qd)
+{
+    if (!qd_int_p(qd))  return false;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if ((qd->data[i] <= 2.251799813685248e15 && qd->data[i] >= 1) ||
+            (qd->data[i] <= -1 && qd->data[i] >= -2.251799813685248e15))
+        {
+            return ((int64_t) qd->data[i]) % 2;
+        }
+    }
+
+    return 1;
 }
 
 void qd_renormalize(qd_t qd, double a0, double a1, double a2, double a3, double a4)
