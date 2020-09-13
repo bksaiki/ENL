@@ -42,7 +42,7 @@ void accum3_f64(double x, double y, double z, double *s, double *e1, double *e2)
     sum2_f64(y, z, s, e2);
     sum2_f64(x, *s, s, e1);
 
-    if (*e1 == 0)
+    if (*e1 == 0.0)
     {
         *e1 = *s;
         *s = 0.0;

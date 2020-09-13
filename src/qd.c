@@ -368,8 +368,8 @@ void qd_add(qd_t r, qd_t a, qd_t b)
             }
         }
 
-        if (k < 2) m[k + 1] = v;
-        if (k < 3) m[k] = u;
+        if (k < 4)  m[k] = u;
+        if (k < 3)  m[k + 1] = v;
         qd_renormalize(r, m[0], m[1], m[2], m[3], 0.0);
     }
 }
