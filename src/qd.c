@@ -505,11 +505,11 @@ void qd_sqrt(qd_t r, qd_t a)
         for (int i = 0; i < 3; ++i)
         {
             qd_div(t, a, x0);
-            qd_add(t, x0, t);
-            t->data[0] /= 2.0;
-            t->data[1] /= 2.0;
-            t->data[2] /= 2.0;
-            t->data[3] /= 2.0;
+            qd_add(x0, x0, t);
+            x0->data[0] /= 2.0;
+            x0->data[1] /= 2.0;
+            x0->data[2] /= 2.0;
+            x0->data[3] /= 2.0;
         }
 
         qd_set(r, x0);
