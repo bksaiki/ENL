@@ -727,22 +727,11 @@ void qd_pow(qd_t r, qd_t a, qd_t b)
     }
     else
     {
-        qd_t t, u, xn, la;
+        qd_t t;
 
-        qd_set_d(xn, pow(a->data[0], b->data[0]));
-        qd_log(la, a);
-
-        // Newton's method: x(k+1) = x(k) * (b*log(a) - log(x(k)) + 1)
-        for (int i = 0; i < 3; ++i)
-        {
-            qd_log(u, xn);
-            qd_sub_d(u, u, 1.0);
-            qd_mul(t, b, la);
-            qd_sub(t, t, u);
-            qd_mul(xn, xn, t);
-        }
-
-        qd_set(r, xn);
+        qd_log(t, a);
+        qd_mul(t, t, b);
+        qd_exp(r, t);
     }
 }
 

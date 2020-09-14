@@ -14,6 +14,7 @@ typedef struct qd_struct_t qd_t[1];
 // *** Debugging *** //
 
 void qd_debug(qd_t r, const char* msg);
+void qd_nint(qd_t r, qd_t x);
 
 // **** Initialization functions **** //
 
@@ -49,6 +50,10 @@ void qd_nroot(qd_t r, qd_t a, int n);
 void qd_exp(qd_t r, qd_t a);
 void qd_log(qd_t r, qd_t a);
 void qd_pow(qd_t r, qd_t a, qd_t b);
+
+// **** Trigometric functions **** //
+
+void qd_sin(qd_t r, qd_t x);
 
 // **** Comparison functions **** //
 

@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     }
 
     if (accum->data[0] == 3.1415926535897931 && accum->data[1] == 1.2246467991473532e-16 &&
-        accum->data[2] == -2.994769809718341e-33 && accum->data[3] == 5.2289406217977859e-50)
+        accum->data[2] == -2.9947698097183397e-33 && accum->data[3] == 1.1124542208633653e-49)
     {
         printf("pi = %.17g + %.17g + %.17g + %.17g\n", accum->data[0], accum->data[1], accum->data[2], accum->data[3]);
         return 0;

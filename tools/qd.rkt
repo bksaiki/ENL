@@ -49,3 +49,25 @@
       (batch-real->qd (map cdr constants) (map car constants))]  
      [_ 
       (printf "No mode specified\n")]))))
+
+(define (generate-sin-intervals count)
+  (parameterize ([bf-precision 4096])
+    (for ([i (in-range count)])
+      (let ([x (real->qd (bfsin (bf/ (bf* (bf i) pi.bf) (bf 1024))))])
+        (printf "\t{ .data[0] = ~a, .data[1] = ~a, .data[2] = ~a, .data[3] = ~a },\n"
+                (list-ref x 0) (list-ref x 1) (list-ref x 2) (list-ref x 3))))))
+
+(define (generate-cos-intervals count)
+  (parameterize ([bf-precision 4096])
+    (for ([i (in-range count)])
+      (let ([x (real->qd (bfcos (bf/ (bf* (bf i) pi.bf) (bf 1024))))])
+        (printf "\t{ .data[0] = ~a, .data[1] = ~a, .data[2] = ~a, .data[3] = ~a },\n"
+                (list-ref x 0) (list-ref x 1) (list-ref x 2) (list-ref x 3))))))
+
+(define (generate-inv-factorial count)
+  (parameterize ([bf-precision 4096])
+    (for ([i (in-range count)])
+      (let ([x (real->qd (bf/ 1.bf (bfgamma (bf (+ i 1)))))])
+        (printf "\t{ .data[0] = ~a, .data[1] = ~a, .data[2] = ~a, .data[3] = ~a },\n"
+                (list-ref x 0) (list-ref x 1) (list-ref x 2) (list-ref x 3))))))
+
