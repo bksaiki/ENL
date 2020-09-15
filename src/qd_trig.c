@@ -654,76 +654,231 @@ void qd_cos_taylor(qd_t r, qd_t x)
 	qd_set(r, accum);
 }
 
+void qd_trig_reduce(qd_t mpi2, qd_t mpi1024, qd_t r, qd_t x)
+{
+	qd_t t, u;
+
+	// Modulo 2pi
+    qd_div(t, x, QD_2PI);
+    qd_nint(t, t);
+    qd_mul(t, t, QD_2PI);
+    qd_sub(u, x, t);
+
+    // Modulo pi/2
+    qd_div(t, u, QD_PI_2);
+    qd_nint(mpi2, t);
+    qd_mul(t, mpi2, QD_PI_2);
+    qd_sub(u, u, t);
+
+    // Modulo pi/1024
+    qd_div(t, u, QD_PI_1024);
+    qd_nint(mpi1024, t);
+    qd_mul(t, mpi1024, QD_PI_1024);
+    qd_sub(r, u, t);
+}
 
 // Exported trig functions
 
 void qd_sin(qd_t r, qd_t x)
 {
-    qd_t x0, x1, x2, mpi2, mpi1024;
-	qd_t t, s, c, ls, lc;
+    qd_t mpi2, mpi1024, xr;
+	qd_t s, c, ls, lc;
 	int offset;
 
-    // Modulo 2pi
-    qd_div(t, x, QD_2PI);
-    qd_nint(t, t);
-    qd_mul(t, t, QD_2PI);
-    qd_sub(x0, x, t);
-
-    // Modulo pi/2
-    qd_div(mpi2, x0, QD_PI_2);
-    qd_nint(mpi2, mpi2);
-    qd_mul(t, mpi2, QD_PI_2);
-    qd_sub(x1, x0, t);
-
-    // Modulo pi/1024
-    qd_div(mpi1024, x1, QD_PI_1024);
-    qd_nint(mpi1024, mpi1024);
-    qd_mul(t, mpi1024, QD_PI_1024);
-    qd_sub(x2, x1, t);
-
-    // taylor series on reduced argument
-	qd_sin_taylor(s, x2);
-	qd_cos_taylor(c, x2);
-	
-	// sin, cos table lookup
-	offset = (int)mpi1024->data[0];
-	if (offset < 0)
+	if (qd_nan_p(x) || qd_inf_p(x))
 	{
-		qd_set(ls, &qd_sin_table[-offset]);
-		qd_set(lc, &qd_cos_table[-offset]);
-		qd_neg(ls, ls);
+		qd_set_nan(r);
 	}
 	else
 	{
-		qd_set(ls, &qd_sin_table[offset]);
-		qd_set(lc, &qd_cos_table[offset]);
-	}
+		qd_trig_reduce(mpi2, mpi1024, xr, x);
 
-	// adjust result by quadrant: -2, -1, 0, 1, 2
-	if (mpi2->data[0] == -1.0)
-	{
-		qd_mul(s, s, ls);
-		qd_mul(c, c, lc);
-		qd_sub(r, c, s);
-		qd_neg(r, r);
+		// taylor series on reduced argument
+		qd_sin_taylor(s, xr);
+		qd_cos_taylor(c, xr);
+		
+		// sin, cos table lookup
+		offset = (int)mpi1024->data[0];
+		if (offset < 0)
+		{
+			qd_set(ls, &qd_sin_table[-offset]);
+			qd_set(lc, &qd_cos_table[-offset]);
+			qd_neg(ls, ls);
+		}
+		else
+		{
+			qd_set(ls, &qd_sin_table[offset]);
+			qd_set(lc, &qd_cos_table[offset]);
+		}
+
+		// adjust result by quadrant: -2, -1, 0, 1, 2
+		if (mpi2->data[0] == -1.0)
+		{
+			qd_mul(s, s, ls);
+			qd_mul(c, c, lc);
+			qd_sub(r, s, c);
+		}
+		else if (mpi2->data[0] == 0.0)
+		{
+			qd_mul(s, s, lc);
+			qd_mul(c, c, ls);
+			qd_add(r, s, c);
+		}
+		else if (mpi2->data[0] == 1.0)
+		{
+			qd_mul(s, s, ls);
+			qd_mul(c, c, lc);
+			qd_sub(r, c, s);
+		}
+		else
+		{
+			qd_mul(s, s, lc);
+			qd_mul(c, c, ls);
+			qd_add(r, s, c);
+			qd_neg(r, r);
+		}
 	}
-	else if (mpi2->data[0] == 0.0)
+}
+
+void qd_cos(qd_t r, qd_t x)
+{
+    qd_t mpi2, mpi1024, xr;
+	qd_t s, c, ls, lc;
+	int offset;
+
+	if (qd_nan_p(x) || qd_inf_p(x))
 	{
-		qd_mul(s, s, lc);
-		qd_mul(c, c, ls);
-		qd_add(r, s, c);
-	}
-	else if (mpi2->data[0] == 1.0)
-	{
-		qd_mul(s, s, ls);
-		qd_mul(c, c, lc);
-		qd_sub(r, c, s);
+		qd_set_nan(r);
 	}
 	else
 	{
-		qd_mul(s, s, lc);
-		qd_mul(c, c, ls);
-		qd_add(r, s, c);
-		qd_neg(r, r);
+		qd_trig_reduce(mpi2, mpi1024, xr, x);
+
+		// taylor series on reduced argument
+		qd_sin_taylor(s, xr);
+		qd_cos_taylor(c, xr);
+		
+		// sin, cos table lookup
+		offset = (int)mpi1024->data[0];
+		if (offset < 0)
+		{
+			qd_set(ls, &qd_sin_table[-offset]);
+			qd_set(lc, &qd_cos_table[-offset]);
+			qd_neg(ls, ls);
+		}
+		else
+		{
+			qd_set(ls, &qd_sin_table[offset]);
+			qd_set(lc, &qd_cos_table[offset]);
+		}
+
+		// adjust result by quadrant: -2, -1, 0, 1, 2
+		if (mpi2->data[0] == -1.0)
+		{
+			qd_mul(s, s, lc);
+			qd_mul(c, c, ls);
+			qd_add(r, s, c);
+			
+		}
+		else if (mpi2->data[0] == 0.0)
+		{
+			qd_mul(s, s, ls);
+			qd_mul(c, c, lc);
+			qd_sub(r, c, s);
+		}
+		else if (mpi2->data[0] == 1.0)
+		{
+			qd_mul(s, s, lc);
+			qd_mul(c, c, ls);
+			qd_add(r, s, c);
+			qd_neg(r, r);
+		}
+		else
+		{
+			qd_mul(s, s, ls);
+			qd_mul(c, c, lc);
+			qd_sub(r, s, c);
+		}
+	}
+}
+
+void qd_tan(qd_t r, qd_t x)
+{
+	qd_t mpi2, mpi1024, xr;
+	qd_t s, c, ls, lc;
+	qd_t ts, tc, t, u;
+	int offset;
+
+	if (qd_nan_p(x) || qd_inf_p(x))
+	{
+		qd_set_nan(r);
+	}
+	else
+	{
+		// taylor series on reduced argument
+		qd_trig_reduce(mpi2, mpi1024, xr, x);
+		qd_sin_taylor(s, xr);
+		qd_cos_taylor(c, xr);
+		
+		// sin, cos table lookup
+		offset = (int)mpi1024->data[0];
+		if (offset < 0)
+		{
+			qd_set(ls, &qd_sin_table[-offset]);
+			qd_set(lc, &qd_cos_table[-offset]);
+			qd_neg(ls, ls);
+		}
+		else
+		{
+			qd_set(ls, &qd_sin_table[offset]);
+			qd_set(lc, &qd_cos_table[offset]);
+		}
+
+		// adjust result by quadrant: -2, -1, 0, 1, 2
+		if (mpi2->data[0] == -1.0)
+		{
+			qd_mul(t, s, ls);
+			qd_mul(u, c, lc);
+			qd_sub(ts, t, u);
+			
+			qd_mul(t, s, lc);
+			qd_mul(u, c, ls);
+			qd_add(tc, t, u);
+		}
+		else if (mpi2->data[0] == 0.0)
+		{
+			qd_mul(t, s, lc);
+			qd_mul(u, c, ls);
+			qd_add(ts, t, u);
+
+			qd_mul(t, s, ls);
+			qd_mul(u, c, lc);
+			qd_sub(tc, u, t);
+		}
+		else if (mpi2->data[0] == 1.0)
+		{
+			qd_mul(t, s, ls);
+			qd_mul(u, c, lc);
+			qd_sub(ts, u, t);
+
+			qd_mul(t, s, lc);
+			qd_mul(u, c, ls);
+			qd_add(t, t, u);
+			qd_neg(tc, t);
+		}
+		else
+		{
+			qd_mul(t, s, lc);
+			qd_mul(u, c, ls);
+			qd_add(t, t, u);
+			qd_neg(ts, t);
+
+			qd_mul(t, s, ls);
+			qd_mul(u, c, lc);
+			qd_sub(tc, t, u);
+		}
+
+		// tan(x) = sin(x) / cos(x)
+		qd_div(r, ts, tc);
 	}
 }

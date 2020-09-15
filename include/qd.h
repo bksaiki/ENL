@@ -54,6 +54,8 @@ void qd_pow(qd_t r, qd_t a, qd_t b);
 // **** Trigometric functions **** //
 
 void qd_sin(qd_t r, qd_t x);
+void qd_cos(qd_t r, qd_t x);
+void qd_tan(qd_t r, qd_t x);
 
 // **** Comparison functions **** //
 
