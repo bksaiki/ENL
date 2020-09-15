@@ -57,6 +57,8 @@ void qd_sin(qd_t r, qd_t x);
 void qd_cos(qd_t r, qd_t x);
 void qd_tan(qd_t r, qd_t x);
 
+void qd_asin(qd_t r, qd_t x);
+
 // **** Comparison functions **** //
 
 int qd_cmp(qd_t a, qd_t b);

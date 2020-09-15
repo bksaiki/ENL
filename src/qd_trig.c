@@ -878,7 +878,47 @@ void qd_tan(qd_t r, qd_t x)
 			qd_sub(tc, t, u);
 		}
 
-		// tan(x) = sin(x) / cos(x)
-		qd_div(r, ts, tc);
+		qd_div(r, ts, tc);	// tan(x) = sin(x) / cos(x)
+	}
+}
+
+void qd_asin(qd_t r, qd_t x)
+{
+	if (qd_nan_p(x) || qd_cmp_d(x, 1.0) > 0 || qd_cmp_d(x, -1.0) < 0)
+	{
+		qd_set_nan(r);
+	}
+	else
+	{
+		qd_t xn, x0, t, u;
+
+		// Range reduction: asin(x) = 2 * asin(x / (sqrt(2) * sqrt(1 + sqrt(1 - x^2))))
+		qd_set(u, x);
+		for (int i = 0; i < 2; ++i)
+		{
+			qd_mul(t, u, u);
+			qd_sub_d(t, t, 1.0);
+			qd_neg(t, t);
+			qd_sqrt(t, t);
+
+			qd_add_d(t, t, 1.0);
+			qd_sqrt(t, t);
+			qd_mul(t, t, QD_SQRT2);
+			qd_div(u, u, t);
+		}
+
+		// Newton's method: x(k+1) = x(k) - (sin(x(k)) - a) / cos(x(k))
+		qd_set(x0, u);
+		qd_set_d(xn, asin(x0->data[0]));
+		for (int i = 0; i < 3; ++i)
+		{
+			qd_sin(t, xn);
+			qd_sub(t, t, x0);
+			qd_cos(u, xn);
+			qd_div(t, t, u);
+			qd_sub(xn, xn, t);
+		}
+
+		qd_mul_d(r, xn, 4.0); // scale by 2^2 (2 iterations of range reduction)
 	}
 }

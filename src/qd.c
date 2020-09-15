@@ -435,7 +435,7 @@ void qd_div(qd_t res, qd_t a, qd_t b)
 
     if (qd_inf_p(a) || qd_inf_p(b) || qd_nan_p(a) || qd_nan_p(b) || qd_zero_p(b))
     {
-        qd_set_nan(r);
+        qd_set_nan(res);
     }
     else
     {
@@ -495,6 +495,10 @@ void qd_sqrt(qd_t r, qd_t a)
     if (qd_signbit(a))
     {
         qd_set_nan(r);
+    }
+    else if (qd_zero_p(a))
+    {
+        qd_set_zero(a, qd_sgn(a));
     }
     else
     {
